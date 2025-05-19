@@ -1,0 +1,3 @@
+C:\msys64\mingw64\bin\cmake.exe -E rm -f CMakeFiles\wallet_system.dir/objects.a
+C:\mingw64\bin\ar.exe qc CMakeFiles\wallet_system.dir/objects.a @CMakeFiles\wallet_system.dir\objects1.rsp
+C:\mingw64\bin\g++.exe -g -Wl,--whole-archive CMakeFiles\wallet_system.dir/objects.a -Wl,--no-whole-archive -o wallet_system.exe -Wl,--out-implib,libwallet_system.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\wallet_system.dir\linkLibs.rsp

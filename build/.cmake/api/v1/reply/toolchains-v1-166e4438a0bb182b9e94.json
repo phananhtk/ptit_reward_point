@@ -10,55 +10,6 @@
 				{
 					"includeDirectories" : 
 					[
-						"C:/mingw64/lib/gcc/x86_64-w64-mingw32/12.1.0/include",
-						"C:/mingw64/include",
-						"C:/mingw64/lib/gcc/x86_64-w64-mingw32/12.1.0/include-fixed"
-					],
-					"linkDirectories" : 
-					[
-						"C:/mingw64/lib/gcc/x86_64-w64-mingw32/12.1.0",
-						"C:/mingw64/lib/gcc",
-						"C:/mingw64/x86_64-w64-mingw32/lib",
-						"C:/mingw64/lib"
-					],
-					"linkFrameworkDirectories" : [],
-					"linkLibraries" : 
-					[
-						"mingw32",
-						"gcc",
-						"moldname",
-						"mingwex",
-						"kernel32",
-						"pthread",
-						"advapi32",
-						"shell32",
-						"user32",
-						"kernel32",
-						"mingw32",
-						"gcc",
-						"moldname",
-						"mingwex",
-						"kernel32"
-					]
-				},
-				"path" : "C:/mingw64/bin/gcc.exe",
-				"version" : "12.1.0"
-			},
-			"language" : "C",
-			"sourceFileExtensions" : 
-			[
-				"c",
-				"m"
-			]
-		},
-		{
-			"compiler" : 
-			{
-				"id" : "GNU",
-				"implicit" : 
-				{
-					"includeDirectories" : 
-					[
 						"C:/mingw64/include/c++/12.1.0",
 						"C:/mingw64/include/c++/12.1.0/x86_64-w64-mingw32",
 						"C:/mingw64/include/c++/12.1.0/backward",
@@ -108,6 +59,7 @@
 				"cc",
 				"cpp",
 				"cxx",
+				"m",
 				"mm",
 				"mpp",
 				"CPP",
