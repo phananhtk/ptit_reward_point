@@ -228,11 +228,12 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
 1. Trong Xcode, nhấn **Product > Build** (`Cmd+B`) để build.
 
 ## Mô tả Cách Chạy Chương Trình
-- **Chạy chương trình với Makefile**
+- **Chạy chương trình với Makefile bằng MSYS2 MINGW64**
 1. Chuyển đến thư mục:
 ```
-cd "/d/ptit/C++ PTIT/ptit_reward_point"
+cd "/d/ptit/C++ PTIT/ptit_reward_point" 
 ```
+- đường dẫn dến dự án của bạn
 Biến dịch:
 ```
 make
