@@ -181,6 +181,40 @@ int loginUser() {
 
 // Đổi mật khẩu cho người dùng đã đăng nhập (idx là vị trí trong vector `users`)
 void changePassword(int idx) {
+     string currentPwd;
+    cout << "Nhap mat khau hien tai: ";
+    getline(cin, currentPwd);
+    string currentHash = currentPwd;
+    if (currentHash != users[idx].passwordHash)
+    {
+        cout << "Mat khau hien tai khong chinh xac.\n";
+        return;
+    }
+    string newPwd, confirmPwd;
+    cout << "Mat khau moi: ";
+    getline(cin, newPwd);
+    cout << "Xac nhan mat khau moi: ";
+    getline(cin, confirmPwd);
+    if (newPwd.empty())
+    {
+        cout << "Mat khau moi khong duoc de trong.\n";
+        return;
+    }
+    if (newPwd != confirmPwd)
+    {
+        cout << "Mat khau xac nhan khong khop.\n";
+        return;
+    }
+    if (newPwd  == users[idx].passwordHash)
+    {
+        cout << "Mat khau moi trung voi mat khau cu. Hay chon mat khau khac.\n";
+        return;
+    }
+    // Cập nhật mật khẩu
+     users[idx].passwordHash = newPwd;
+    users[idx].needChangePassword = false; // sau khi tự đổi mật khẩu thì không cần đổi nữa
+    saveUsersToFile();
+    cout << "Doi mat khau thanh cong.\n";
 }
 
 // Cập nhật thông tin cá nhân (họ tên, email) của người dùng, có xác thực OTP
