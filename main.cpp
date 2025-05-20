@@ -1,4 +1,5 @@
 #include <iostream>
+#include <windows.h>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
@@ -676,6 +677,8 @@ void listAllUsers()
 // -------------------- HÀM MAIN (CHƯƠNG TRÌNH CHÍNH) --------------------
 int main()
 {
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
     // Tải dữ liệu người dùng từ tệp vào vector `users`
     int userCount = loadUsersFromFile();
     cout << "Da tai " << userCount << " nguoi dung.\n";

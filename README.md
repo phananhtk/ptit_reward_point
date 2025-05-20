@@ -228,7 +228,15 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
 1. Trong Xcode, nhấn **Product > Build** (`Cmd+B`) để build.
 
 ## Mô tả Cách Chạy Chương Trình
-
+- **Chạy chương trình với Makefile**
+1. Chuyển đến thư mục:
+```
+cd "/d/ptit/C++ PTIT/ptit_reward_point"
+```
+Biến dịch:
+```
+make
+```
 ### 1. Chạy Chương Trình
 - **Windows**:
   1. Mở terminal trong thư mục dự án (nơi chứa `wallet_system.exe`).
