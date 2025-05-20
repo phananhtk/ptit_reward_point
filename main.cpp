@@ -477,15 +477,142 @@ void changePassword(int idx)
 void updatePersonalInfo(int idx)
 {
 }
+// Thực hiện chuyển điểm từ tài khoản người dùng hiện tại (fromIdx) đến tài khoản đích (toUsername).
+// Có xác thực OTP và đảm bảo tính nguyên tử của giao dịch.
+void transferPoints(int fromIdx) {
+    string toUsername;
+    cout << "Nhập tên tài khoản người nhận: ";
+    getline(cin, toUsername);
+    int toIdx = findUserIndex(toUsername);
+    if (toIdx == -1) {
+        cout << "Tài khoản người nhận không tồn tại.\n";
+        return;
+    }
+    if (toIdx == fromIdx) {
+        cout << "Bạn không thể chuyển điểm cho chính mình.\n";
+        return;
+    }
+    string amountStr;
+    cout << "Nhập số điểm cần chuyển: ";
+    getline(cin, amountStr);
+    long long amount = 0;
+    try {
+        amount = stoll(amountStr);
+    } catch (...) {
+        amount = 0;
+    }
+    if (amount <= 0) {
+        cout << "Số điểm phải là số dương lớn hơn 0.\n";
+        return;
+    }
+    if (users[fromIdx].balance < amount) {
+        cout << "Số dư không đủ để thực hiện giao dịch.\n";
+        return;
+    }
+    // Yêu cầu OTP xác nhận giao dịch chuyển điểm
+    if (!verifyOTP(users[fromIdx].email)) {
+        return;
+    }
+    // Thực hiện giao dịch chuyển điểm (đảm bảo nguyên tử)
+    long long &senderBal = users[fromIdx].balance;
+    long long &recvBal   = users[toIdx].balance;
+    // Lưu lại số dư ban đầu để có thể khôi phục nếu cần (trường hợp giao dịch lỗi)
+    long long oldSenderBal = senderBal;
+    long long oldRecvBal   = recvBal;
+    // 1. Trừ điểm từ ví người gửi
+    senderBal -= amount;
+    // 2. Cộng điểm vào ví người nhận
+    recvBal   += amount;
+    // 3. Lưu thay đổi xuống tệp dữ liệu người dùng (giả định không lỗi)
+    if (!ofstream(USERS_FILE)) {
+        // Nếu mở tệp không thành công (lỗi ghi file), khôi phục số dư cũ và hủy giao dịch
+        senderBal = oldSenderBal;
+        recvBal   = oldRecvBal;
+        cerr << "Lỗi hệ thống: không thể ghi dữ liệu. Giao dịch bị hủy.\n";
+        return;
+    }
+    saveUsersToFile();
+    // 4. Ghi lịch sử giao dịch vào tệp log
+    ofstream fout(LOG_FILE, ios::app);
+    if (!fout) {
+        cerr << "Không thể ghi lịch sử giao dịch (nhưng giao dịch đã hoàn tất).\n";
+    } else {
+        // Lấy thời gian hiện tại (timestamp)
+        auto now = chrono::system_clock::now();
+        time_t t = chrono::system_clock::to_time_t(now);
+        tm localtm = *localtime(&t);
+        // Ghi vào log: thời gian, người gửi, người nhận, số điểm
+        fout << put_time(&localtm, "%Y-%m-%d %H:%M:%S") << ", "
+             << users[fromIdx].username << ", "
+             << users[toIdx].username << ", "
+             << amount << "\n";
+        fout.close();
+    }
+    cout << "Chuyển điểm thành công. Số dư hiện tại của bạn là " << users[fromIdx].balance << " điểm.\n";
+}
 
 // Xem toàn bộ lịch sử giao dịch (dành cho quản trị viên)
-void viewTransactionLog()
-{
+void viewTransactionLog() {
+    ifstream fin(LOG_FILE);
+    if (!fin) {
+        cout << "Không có lịch sử giao dịch nào.\n";
+        return;
+    }
+    cout << "===== LỊCH SỬ GIAO DỊCH HỆ THỐNG =====\n";
+    string line;
+    while (getline(fin, line)) {
+        cout << line << endl;
+    }
+    fin.close();
+
 }
 
 // Xem lịch sử giao dịch của chính người dùng hiện tại (chỉ liệt kê các giao dịch mà user này gửi hoặc nhận)
-void viewMyTransactions(int idx)
-{
+void viewMyTransactions(int idx) {
+      ifstream fin(LOG_FILE);
+    if (!fin) {
+        cout << "Không có lịch sử giao dịch.\n";
+        return;
+    }
+    cout << "===== LỊCH SỬ GIAO DỊCH CỦA BẠN =====\n";
+    string line;
+    string uname = users[idx].username;
+    // Duyệt từng dòng trong log, kiểm tra sự xuất hiện của username (ở cột người gửi hoặc người nhận)
+    while (getline(fin, line)) {
+        // Mỗi dòng format: TIMESTAMP, FROM_USER, TO_USER, AMOUNT
+        // Sử dụng stringstream để tách các phần
+        string ts, fromUser, toUser;
+        long long amount;
+        stringstream ss(line);
+        getline(ss, ts, ',');
+        getline(ss, fromUser, ',');
+        getline(ss, toUser, ',');
+        string amountStr;
+        getline(ss, amountStr, ',');
+        // Loại bỏ khoảng trắng thừa xung quanh các phần tử đã tách
+        auto trim = [](string &s) {
+            while (!s.empty() && isspace(s.back())) s.pop_back();
+            while (!s.empty() && isspace(s.front())) s.erase(0, 1);
+        };
+        trim(ts);
+        trim(fromUser);
+        trim(toUser);
+        trim(amountStr);
+        try {
+            amount = stoll(amountStr);
+        } catch (...) {
+            amount = 0;
+        }
+        // Kiểm tra nếu user hiện tại là người gửi hoặc người nhận
+        if (fromUser == uname || toUser == uname) {
+            // Xác định vai trò của user trong giao dịch (gửi hoặc nhận)
+            string action = (fromUser == uname) ? "đã gửi" : "đã nhận";
+            string otherUser = (fromUser == uname) ? toUser : fromUser;
+            string direction = (fromUser == uname) ? "đến" : "từ";
+            cout << ts << ": " << action << " " << amount << " điểm " << direction << " tài khoản " << otherUser << ".\n";
+        }
+    }
+    fin.close();
 }
 
 // Xem thông tin tài khoản cá nhân của người dùng (username, họ tên, email, số dư, vai trò)
