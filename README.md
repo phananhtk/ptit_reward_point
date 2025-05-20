@@ -3,12 +3,11 @@ Reward Point Management
 Thành Viên dự án 
 1. Phan Anh 
   - chuẩn bị dự án 
-  - viết hàm main 
+  - viết hàm `main` 
   - Hàm xử lý đăng nhập người dùng `loginUser`
   - chức năng tạo tài khoản tự động (role admin) khi chạy chương trình lần đầu
   - xử lí chức năng gửi OTP về email với thư viện "CURL" `sendEmailOTP`  ` verifyOTP` 
   - cài đặt thư viện liên quan
-  - các hàm đã xử lí : `saveUsersToFile` , 
 2. Tiến Dũng
   - Đăng kí user `registerUser`
   - Hàm cho quản trị viên tạo tài khoản mới `adminCreateUser`
