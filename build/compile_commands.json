@@ -1,8 +1,0 @@
-[
-{
-  "directory": "T:/PTIT/C++ Demo/ptit_reward_point/build",
-  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/wallet_system.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\wallet_system.dir\\main.cpp.obj -c \"T:\\PTIT\\C++ Demo\\ptit_reward_point\\main.cpp\"",
-  "file": "T:/PTIT/C++ Demo/ptit_reward_point/main.cpp",
-  "output": "CMakeFiles/wallet_system.dir/main.cpp.obj"
-}
-]

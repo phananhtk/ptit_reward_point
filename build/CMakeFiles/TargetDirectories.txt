@@ -1,3 +1,0 @@
-T:/PTIT/C++ Demo/ptit_reward_point/build/CMakeFiles/wallet_system.dir
-T:/PTIT/C++ Demo/ptit_reward_point/build/CMakeFiles/edit_cache.dir
-T:/PTIT/C++ Demo/ptit_reward_point/build/CMakeFiles/rebuild_cache.dir
