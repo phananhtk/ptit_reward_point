@@ -8,7 +8,6 @@
 #include <chrono>
 #include <cstdlib>
 #include <cctype>
-#include <curl/curl.h>
 #include <vector>
 #include <chrono>
 #include <curl/curl.h>
@@ -35,8 +34,8 @@ bool sendEmailOTP(const string &toEmail, const string &subject, const string &bo
         return false;
 
     // Replace with your Gmail and App Password
-    const string fromEmail = "whitehousecono@gmail.com";
-    const string appPassword = "Dungtao666";
+    const string fromEmail = "phananh1304@gmail.com";
+    const string appPassword = "dbec imyt kkqm lpaw";
 
     string fullPayload =
         "To: " + toEmail + "\r\n" +
@@ -89,7 +88,17 @@ struct User
 vector<User> users;
 const string USERS_FILE = "users.txt";      // Tệp lưu thông tin tài khoản người dùng
 const string LOG_FILE = "transactions.txt"; // Tệp lưu lịch sử giao dịch chuyển điểm
-
+int findUserIndex(const string &username)
+{
+    for (size_t i = 0; i < users.size(); ++i)
+    {
+        if (users[i].username == username)
+        {
+            return (int)i;
+        }
+    }
+    return -1;
+}
 // Xử lý đăng nhập: kiểm tra tên đăng nhập và mật khẩu có khớp trong hệ thống không.
 // Trả về chỉ số người dùng (index trong vector `users`) nếu đăng nhập thành công, hoặc -1 nếu thất bại.
 int loginUser()
@@ -231,17 +240,7 @@ int loadUsersFromFile()
 
 // Tìm vị trí (index) của người dùng trong vector `users` dựa trên `username`.
 // Trả về -1 nếu không tìm thấy.
-int findUserIndex(const string &username)
-{
-    for (size_t i = 0; i < users.size(); ++i)
-    {
-        if (users[i].username == username)
-        {
-            return (int)i;
-        }
-    }
-    return -1;
-}
+
 
 // Chức năng đăng ký tài khoản mới cho người dùng thường
 void registerUser()
@@ -370,29 +369,7 @@ void adminCreateUser()
 //}
 
 // Đổi mật khẩu cho người dùng đã đăng nhập (idx là vị trí trong vector `users`)
-void changePassword(int idx)
-{
-}
 
-// Cập nhật thông tin cá nhân (họ tên, email) của người dùng, có xác thực OTP
-void updatePersonalInfo(int idx)
-{
-}
-
-// Xem toàn bộ lịch sử giao dịch (dành cho quản trị viên)
-void viewTransactionLog()
-{
-}
-
-// Xem lịch sử giao dịch của chính người dùng hiện tại (chỉ liệt kê các giao dịch mà user này gửi hoặc nhận)
-void viewMyTransactions(int idx)
-{
-}
-
-// Xem thông tin tài khoản cá nhân của người dùng (username, họ tên, email, số dư, vai trò)
-void viewPersonalInfo(int idx)
-{
-}
 
 // Liệt kê danh sách tất cả người dùng trong hệ thống (dành cho quản trị viên)
 void listAllUsers()
