@@ -1,2 +1,0 @@
-D:/ptit/C++ PTIT/ptit_reward_point/build/CMakeFiles/edit_cache.dir
-D:/ptit/C++ PTIT/ptit_reward_point/build/CMakeFiles/rebuild_cache.dir
