@@ -15,25 +15,28 @@
 
 using namespace std;
 
-size_t payload_source(void* ptr, size_t size, size_t nmemb, void* userp) 
+size_t payload_source(void *ptr, size_t size, size_t nmemb, void *userp)
 {
-    const char** payload = (const char**)userp;
+    const char **payload = (const char **)userp;
     size_t len = strlen(*payload);
-    if (len == 0) return 0;
+    if (len == 0)
+        return 0;
     memcpy(ptr, *payload, len);
     *payload += len;
     return len;
 }
-bool sendEmailOTP(const string& toEmail, const string& subject, const string& body) {
-    CURL* curl;
+bool sendEmailOTP(const string &toEmail, const string &subject, const string &body)
+{
+    CURL *curl;
     CURLcode res = CURLE_OK;
     curl = curl_easy_init();
 
-    if (!curl) return false;
+    if (!curl)
+        return false;
 
     // Replace with your Gmail and App Password
-    const string fromEmail = "phananh1304@gmail.com";
-    const string appPassword = "dbec imyt kkqm lpaw";
+    const string fromEmail = "whitehousecono@gmail.com";
+    const string appPassword = "Dungtao666";
 
     string fullPayload =
         "To: " + toEmail + "\r\n" +
@@ -41,7 +44,7 @@ bool sendEmailOTP(const string& toEmail, const string& subject, const string& bo
         "Subject: " + subject + "\r\n" +
         "\r\n" + body + "\r\n";
 
-    const char* payload = fullPayload.c_str();
+    const char *payload = fullPayload.c_str();
 
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://smtp.gmail.com:587");
     curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
@@ -49,7 +52,7 @@ bool sendEmailOTP(const string& toEmail, const string& subject, const string& bo
     curl_easy_setopt(curl, CURLOPT_PASSWORD, appPassword.c_str());
     curl_easy_setopt(curl, CURLOPT_MAIL_FROM, ("<" + fromEmail + ">").c_str());
 
-    struct curl_slist* recipients = NULL;
+    struct curl_slist *recipients = NULL;
     recipients = curl_slist_append(recipients, ("<" + toEmail + ">").c_str());
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
@@ -62,14 +65,14 @@ bool sendEmailOTP(const string& toEmail, const string& subject, const string& bo
     curl_slist_free_all(recipients);
     curl_easy_cleanup(curl);
 
-    if (res != CURLE_OK) {
+    if (res != CURLE_OK)
+    {
         cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << endl;
         return false;
     }
 
     return true;
 }
-
 
 // Cấu trúc lưu thông tin một người dùng trong hệ thống
 struct User
@@ -86,26 +89,28 @@ struct User
 vector<User> users;
 const string USERS_FILE = "users.txt";      // Tệp lưu thông tin tài khoản người dùng
 const string LOG_FILE = "transactions.txt"; // Tệp lưu lịch sử giao dịch chuyển điểm
-const std::string SENDER_EMAIL = "whitehousecono@gmail.com";
-const std::string SENDER_APP_PASSWORD = "Dungtao666";
 
 // Xử lý đăng nhập: kiểm tra tên đăng nhập và mật khẩu có khớp trong hệ thống không.
 // Trả về chỉ số người dùng (index trong vector `users`) nếu đăng nhập thành công, hoặc -1 nếu thất bại.
-int loginUser() {
+int loginUser()
+{
     string username;
-    cout << "Tên đăng nhập: ";
+    cout << "Ten dang nhap: ";
     getline(cin, username);
     string password;
-    cout << "Mật khẩu: ";
+    cout << "Mat khau: ";
     getline(cin, password);
     int idx = findUserIndex(username);
-    if (idx == -1) {
-        cout << "Tên đăng nhập không tồn tại.\n";
+    if (idx == -1)
+    {
+        cout << "Ten dang nhap khong ton tai.\n";
         return -1;
     }
     string hashInput = password;
-    if (hashInput != users[idx].passwordHash) {
-        cout << "Mật khẩu không đúng.\n";
+    ;
+    if (hashInput != users[idx].passwordHash)
+    {
+        cout << "Mat khau khong dung.\n";
         return -1;
     }
     return idx;
@@ -113,20 +118,25 @@ int loginUser() {
 
 // Gửi mã OTP đến email người dùng và yêu cầu họ nhập mã để xác nhận.
 
-bool verifyOTP(const string &email) {
-    // Sinh ngẫu nhiên một mã OTP 6 chữ số
+bool verifyOTP(const string &email)
+{
+   // Sinh ngẫu nhiên một mã OTP 6 chữ số
     int otpCode = 100000 + rand() % 900000;
-    // Thông báo gửi OTP
-    sendEmailOTP(email, "Mã OTP", std::to_string(otpCode));
-    cout << "Mã OTP đã được gửi đến email của bạn";
-    if (!email.empty()) {
+    // Thông báo (giả lập) gửi OTP
+    sendEmailOTP(email, "Ma OTP", std::to_string(otpCode));
+    cout << "Ma OTP da duoc gui den email cua ban";
+    if (!email.empty())
+    {
         cout << " (" << email << ")";
     }
-    cout << "Nhập mã OTP để xác nhận: ";
+    // In ra mã OTP (trong thực tế sẽ gửi qua email, SMS; ở đây in ra để người dùng nhập)
+    // cout << "Mã OTP: " << otpCode << endl;
+    cout << "Nhap ma OTP de xac nhan: ";
     string input;
     getline(cin, input);
-    if (input != to_string(otpCode)) {
-        cout << "Mã OTP không đúng. Hủy thao tác.\n";
+    if (input != to_string(otpCode))
+    {
+        cout << "Ma OTP khong dung. Huy thao tac.\n";
         return false;
     }
     return true;
@@ -139,7 +149,7 @@ void saveUsersToFile()
     ofstream fout(USERS_FILE);
     if (!fout)
     {
-        cerr << "Lỗi: Không thể ghi tệp dữ liệu người dùng.\n";
+        cerr << "Loi: Khong the ghi tep du lieu nguoi dung.\n";
         return;
     }
     for (const auto &u : users)
@@ -236,28 +246,28 @@ int findUserIndex(const string &username)
 // Chức năng đăng ký tài khoản mới cho người dùng thường
 void registerUser()
 {
-    string username;
-    cout << "Tên đăng nhập mới: ";
+     string username;
+    cout << "Ten dang nhap moi: ";
     getline(cin, username);
     if (username.empty())
     {
-        cout << "Tên đăng nhập không được bỏ trống.\n";
+        cout << "Ten dang nhap khong duoc bo trong.\n";
         return;
     }
     if (findUserIndex(username) != -1)
     {
-        cout << "Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.\n";
+        cout << "Ten dang nhap da ton tai. Vui long chon ten khac.\n";
         return;
     }
     string fullname;
-    cout << "Tên người dùng: ";
+    cout << "Ten nguoi dung: ";
     getline(cin, fullname);
     string email;
     cout << "Email: ";
     getline(cin, email);
     // Nhập mật khẩu hoặc để trống nếu muốn hệ thống tự sinh
     string pwd;
-    cout << "Mật khẩu (nhấn Enter để sử dụng mật khẩu tự động): ";
+    cout << "Mat khau (nhan Enter de su dung mat khau tu dong): ";
     getline(cin, pwd);
     bool autoPass = false;
     if (pwd.empty())
@@ -272,8 +282,8 @@ void registerUser()
             generated.push_back(chars[rand() % chars.size()]);
         }
         pwd = generated;
-        cout << "Mật khẩu được tạo tự động cho bạn là: " << pwd << endl;
-        cout << "(Hãy lưu mật khẩu này và **đổi lại sau khi đăng nhập**.)\n";
+        cout << "Mat khau duoc tao tu dong cho ban la: " << pwd << endl;
+        cout << "(Hay luu mat khau nay va **doi lai sau khi dang nhap**.)\n";
     }
     // Băm mật khẩu và lưu thông tin người dùng
     string pwdHash = pwd;
@@ -287,7 +297,7 @@ void registerUser()
     newUser.needChangePassword = autoPass; // nếu mật khẩu tự sinh thì đánh dấu yêu cầu đổi mật khẩu lần đầu
     users.push_back(newUser);
     saveUsersToFile();
-    cout << "Đăng ký tài khoản thành công. Bạn có thể đăng nhập bây giờ.\n";
+    cout << "Dang ky tai khoan thanh cong. Ban co the dang nhap bay gio.\n";
 }
 
 // (Dành cho quản trị viên) Tạo tài khoản người dùng mới (có thể là user thường hoặc admin khác)
