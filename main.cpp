@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <cctype>
+#include <curl/curl.h>
 
 using namespace std;
 

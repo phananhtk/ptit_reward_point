@@ -64,7 +64,8 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
      g++ --version
      ```
 
-### 2. Cài Đặt vcpkg và Thư Viện OpenSSL, cURL
+### 2. Cài Đặt Thư Viện OpenSSL và cURL
+#### Phương pháp 1: Sử dụng vcpkg
 1. Mở Command Prompt, clone vcpkg:
    ```
    git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
@@ -85,6 +86,28 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
    ```
 5. Kiểm tra thư viện:
    - OpenSSL và cURL sẽ được cài vào `C:\vcpkg\installed\x64-windows`. Đảm bảo thư mục `include\openssl`, `include\curl`, và `lib` tồn tại.
+
+#### Phương pháp 2: Sử dụng MSYS2 MinGW-w64
+1. Cài đặt OpenSSL:
+   - Trong terminal MSYS2 (dùng môi trường MinGW-w64: `C:\msys64\mingw64.exe`), chạy:
+     ```
+     pacman -S mingw-w64-x86_64-openssl
+     ```
+   - Kiểm tra cài đặt:
+     ```
+     pkg-config --modversion openssl
+     ```
+   - OpenSSL sẽ được cài vào `/mingw64`.
+2. Cài đặt cURL:
+   - Trong terminal MSYS2, chạy:
+     ```
+     pacman -S mingw-w64-x86_64-curl
+     ```
+   - Kiểm tra cài đặt:
+     ```
+     curl --version
+     ```
+   - cURL sẽ được cài vào `/mingw64/bin`.
 
 ### 3. Cấu Hình Makefile
 1. Đảm bảo tệp `Makefile` trong thư mục dự án có nội dung:
