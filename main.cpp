@@ -6,9 +6,42 @@
 #include <vector>
 #include <chrono>
 #include <curl/curl.h>
+#include <openssl/evp.h>
+#include <openssl/sha.h>
 
 using namespace std;
 
+// Hàm băm SHA-256 để lưu mật khẩu an toàn vào hệ thống.
+string sha256(const string& str) {
+    unsigned char hash[EVP_MAX_MD_SIZE];
+    unsigned int hash_len;
+
+    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+    if (!ctx) return "";
+
+    if (1 != EVP_DigestInit_ex(ctx, EVP_sha256(), NULL)) {
+        EVP_MD_CTX_free(ctx);
+        return "";
+    }
+
+    if (1 != EVP_DigestUpdate(ctx, str.c_str(), str.size())) {
+        EVP_MD_CTX_free(ctx);
+        return "";
+    }
+
+    if (1 != EVP_DigestFinal_ex(ctx, hash, &hash_len)) {
+        EVP_MD_CTX_free(ctx);
+        return "";
+    }
+
+    EVP_MD_CTX_free(ctx);
+
+    stringstream ss;
+    for (unsigned int i = 0; i < hash_len; ++i) {
+        ss << hex << setw(2) << setfill('0') << (int)hash[i];
+    }
+    return ss.str();
+}
 // Tao payload de send SMTP mail
 size_t payload_source(void* ptr, size_t size, size_t nmemb, void* userp) {
     const char** payload = (const char**)userp;
@@ -99,7 +132,7 @@ int loginUser() {
         cout << "Tên đăng nhập không tồn tại.\n";
         return -1;
     }
-    string hashInput = password;
+    string hashInput = sha256(password);
     if (hashInput != users[idx].passwordHash) {
         cout << "Mật khẩu không đúng.\n";
         return -1;
@@ -207,6 +240,23 @@ void listAllUsers() {
 
 // -------------------- HÀM MAIN (CHƯƠNG TRÌNH CHÍNH) --------------------
 int main() {
+    // Tải dữ liệu người dùng từ tệp vào vector `users`
+    int userCount = loadUsersFromFile();
+    if (userCount == 0) {
+        // Nếu hệ thống chưa có người dùng nào, tự động tạo tài khoản quản trị mặc định
+        User admin;
+        admin.username = "admin";
+        admin.fullname = "Administrator";
+        admin.email = "";  // chưa có email
+        string defaultPass = "admin";
+        admin.passwordHash = sha256(defaultPass);
+        admin.balance = 1000;       // khởi tạo ví admin với 1000 điểm để thử giao dịch
+        admin.isAdmin = true;
+        admin.needChangePassword = true;  // yêu cầu đổi mật khẩu do dùng mật khẩu mặc định
+        users.push_back(admin);
+        saveUsersToFile();
+        cout << "Đã tạo tài khoản quản trị mặc định (username: admin, password: admin). Vui lòng đăng nhập và đổi mật khẩu.\n";
+    }
     // Vòng lặp vô hạn cho menu đăng nhập/đăng ký
     while (true) {
         cout << "\n=== MENU ===\n";
@@ -215,6 +265,9 @@ int main() {
         cout << "0. Thoát\n";
         cout << "Lựa chọn: ";
         string choice;
+        if (!getline(cin, choice)) {
+            break;
+        }
     }
 
     return 0;
