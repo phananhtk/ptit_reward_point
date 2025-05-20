@@ -150,15 +150,15 @@ int findUserIndex(const string &username)
 int loginUser()
 {
     string username;
-    cout << "Ten dang nhap: ";
+    cout << "Tên Đăng Nhập: ";
     getline(cin, username);
     string password;
-    cout << "Mat khau: ";
+    cout << "Mật Khẩu: ";
     getline(cin, password);
     int idx = findUserIndex(username);
     if (idx == -1)
     {
-        cout << "Ten dang nhap khong ton tai.\n";
+        cout << "Ten đăng nhập không tồn tại.\n";
         return -1;
     }
     string hashInput = sha256(password);
@@ -177,20 +177,20 @@ bool verifyOTP(const string &email)
     // Sinh ngẫu nhiên một mã OTP 6 chữ số
     int otpCode = 100000 + rand() % 900000;
     // Thông báo (giả lập) gửi OTP
-    sendEmailOTP(email, "Ma OTP", std::to_string(otpCode));
-    cout << "Ma OTP da duoc gui den email cua ban";
+    sendEmailOTP(email, "Mã OTP", std::to_string(otpCode));
+    cout << "Mã OTP đã được gửi đến email của bạn";
     if (!email.empty())
     {
         cout << " (" << email << ")";
     }
     // In ra mã OTP (trong thực tế sẽ gửi qua email, SMS; ở đây in ra để người dùng nhập)
     // cout << "Mã OTP: " << otpCode << endl;
-    cout << "Nhap ma OTP de xac nhan: ";
+    cout << "Nhập mã OTP để xác nhận: ";
     string input;
     getline(cin, input);
     if (input != to_string(otpCode))
     {
-        cout << "Ma OTP khong dung. Huy thao tac.\n";
+        cout << "Mã OTP không đúng. Hủy thao tác.\n";
         return false;
     }
     return true;
@@ -203,7 +203,7 @@ void saveUsersToFile()
     ofstream fout(USERS_FILE);
     if (!fout)
     {
-        cerr << "Loi: Khong the ghi tep du lieu nguoi dung.\n";
+        cerr << "Lỗi: Không thể ghi tệp dữ liệu người dùng.\n";
         return;
     }
     for (const auto &u : users)
@@ -287,16 +287,16 @@ int loadUsersFromFile()
 void registerUser()
 {
     string username;
-    cout << "Ten dang nhap moi: ";
+    cout << "Tên đăng nhập mới: ";
     getline(cin, username);
     if (username.empty())
     {
-        cout << "Ten dang nhap khong duoc bo trong.\n";
+       cout << "Tên đăng nhập không được bỏ trống.\n";
         return;
     }
     if (findUserIndex(username) != -1)
     {
-        cout << "Ten dang nhap da ton tai. Vui long chon ten khac.\n";
+        cout << "Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.\n";
         return;
     }
     string fullname;
@@ -307,7 +307,7 @@ void registerUser()
     getline(cin, email);
     // Nhập mật khẩu hoặc để trống nếu muốn hệ thống tự sinh
     string pwd;
-    cout << "Mat khau (nhan Enter de su dung mat khau tu dong): ";
+    cout << "Mật khẩu (nhấn Enter để sử dụng mật khẩu tự động): ";
     getline(cin, pwd);
     bool autoPass = false;
     if (pwd.empty())
@@ -322,8 +322,8 @@ void registerUser()
             generated.push_back(chars[rand() % chars.size()]);
         }
         pwd = generated;
-        cout << "Mat khau duoc tao tu dong cho ban la: " << pwd << endl;
-        cout << "(Hay luu mat khau nay va **doi lai sau khi dang nhap**.)\n";
+        cout << "Mật khẩu được tạo tự động cho bạn là: " << pwd << endl;
+        cout << "(Hãy lưu mật khẩu này và **đổi lại sau khi đăng nhập**.)\n";
     }
     // Băm mật khẩu và lưu thông tin người dùng
     string pwdHash = sha256(pwd);
@@ -337,53 +337,53 @@ void registerUser()
     newUser.needChangePassword = autoPass; // nếu mật khẩu tự sinh thì đánh dấu yêu cầu đổi mật khẩu lần đầu
     users.push_back(newUser);
     saveUsersToFile();
-    cout << "Dang ky tai khoan thanh cong. Ban co the dang nhap bay gio.\n";
+     cout << "Đăng ký tài khoản thành công. Bạn có thể đăng nhập bây giờ.\n";
 }
 
 // Đổi mật khẩu cho người dùng đã đăng nhập (idx là vị trí trong vector `users`)
 void changePassword(int idx)
 {
     string currentPwd;
-    cout << "Nhap mat khau hien tai: ";
+    cout << "Nhập mật khẩu hiện tại: ";
     getline(cin, currentPwd);
     string currentHash = sha256(currentPwd);
     ;
     if (currentHash != users[idx].passwordHash)
     {
-        cout << "Mat khau hien tai khong chinh xac.\n";
+        cout << "Mật khẩu hiện tại không chính xác.\n";
         return;
     }
     string newPwd, confirmPwd;
-    cout << "Mat khau moi: ";
+    cout << "Mật khẩu mới: ";
     getline(cin, newPwd);
-    cout << "Xac nhan mat khau moi: ";
+    cout << "Xác nhận mật khẩu mới: ";
     getline(cin, confirmPwd);
     if (newPwd.empty())
     {
-        cout << "Mat khau moi khong duoc de trong.\n";
+        cout << "Mật khẩu mới không được để trống.\n";
         return;
     }
     if (newPwd != confirmPwd)
     {
-        cout << "Mat khau xac nhan khong khop.\n";
+        cout << "Mật khẩu xác nhận không khớp.\n";
         return;
     }
     if (sha256(newPwd) == users[idx].passwordHash)
     {
-        cout << "Mat khau moi trung voi mat khau cu. Hay chon mat khau khac.\n";
+         cout << "Mật khẩu mới trùng với mật khẩu cũ. Hãy chọn mật khẩu khác.\n";;
         return;
     }
     // Cập nhật mật khẩu
     users[idx].passwordHash = sha256(newPwd);
     users[idx].needChangePassword = false; // sau khi tự đổi mật khẩu thì không cần đổi nữa
     saveUsersToFile();
-    cout << "Doi mat khau thanh cong.\n";
+    cout << "Đổi mật khẩu thành công.\n";
 }
 
 // Cập nhật thông tin cá nhân (họ tên, email) của người dùng, có xác thực OTP
 void updatePersonalInfo(int idx)
 {
-    cout << "Ten hien tai: " << users[idx].fullname << ". Nhap ten moi (Enter de giu nguyen): ";
+    cout << "Tên hiện tại: " << users[idx].fullname << ". Nhập tên mới (Enter để giữ nguyên): ";
     string newName;
     string input;
     getline(cin, input);
@@ -391,7 +391,7 @@ void updatePersonalInfo(int idx)
         newName = input;
     else
         newName = users[idx].fullname;
-    cout << "Email hien tai: " << users[idx].email << ". Nhap email moi (Enter de giu nguyen): ";
+    cout << "Email hiện tại: " << users[idx].email << ". Nhập email mới (Enter để giữ nguyên): ";
     string newEmail;
     input.clear();
     getline(cin, input);
@@ -401,7 +401,7 @@ void updatePersonalInfo(int idx)
         newEmail = users[idx].email;
     if (newName == users[idx].fullname && newEmail == users[idx].email)
     {
-        cout << "Khong co thay doi thong tin.\n";
+        cout << "Không có thay đổi thông tin.\n";
         return;
     }
     // Yêu cầu xác thực OTP trước khi thay đổi thông tin quan trọng
@@ -414,7 +414,7 @@ void updatePersonalInfo(int idx)
     users[idx].fullname = newName;
     users[idx].email = newEmail;
     saveUsersToFile();
-    cout << "Cap nhat thong tin ca nhan thanh cong.\n";
+    cout << "Cập nhật thông tin cá nhân thành công.\n";
 }
 
 // Thực hiện chuyển điểm từ tài khoản người dùng hiện tại (fromIdx) đến tài khoản đích (toUsername).
@@ -507,20 +507,20 @@ void transferPoints(int fromIdx)
 void adminCreateUser()
 {
     string username;
-    cout << "Nhap ten dang nhap cho tai khoan moi: ";
+    cout << "Nhập tên đăng nhập cho tài khoản mới: ";
     getline(cin, username);
     if (username.empty())
     {
-        cout << "Ten dang nhap khong duoc de trong.\n";
+        cout << "Tên đăng nhập không được để trống.\n";
         return;
     }
     if (findUserIndex(username) != -1)
     {
-        cout << "Ten dang nhap nay da ton tai. Khong the tao moi.\n";
+        cout << "Tên đăng nhập đang tồn tại. Không thể tạo mới.\n";
         return;
     }
     string roleInput;
-    cout << "Tai khoan nay co quyen quan ly (admin)? (y/n): ";
+    cout << "Tài khoản này có quyền quản lý (admin)? (y/n): ";
     getline(cin, roleInput);
     bool isAdminRole = false;
     if (!roleInput.empty() && (roleInput[0] == 'y' || roleInput[0] == 'Y'))
@@ -528,13 +528,13 @@ void adminCreateUser()
         isAdminRole = true;
     }
     string fullname;
-    cout << "Ten nguoi dung: ";
+    cout << "Tên người dùng: ";
     getline(cin, fullname);
     string email;
     cout << "Email: ";
     getline(cin, email);
     string pwd;
-    cout << "Mat khau (nhan Enter de tu dong tao): ";
+    cout << "Mật khẩu (Nhấn Enter để tạo tự động): ";
     getline(cin, pwd);
     bool autoPass = false;
     if (pwd.empty())
@@ -549,8 +549,8 @@ void adminCreateUser()
             generated.push_back(chars[rand() % chars.size()]);
         }
         pwd = generated;
-        cout << "Mat khau duoc tu dong tao cho tai khoan moi la: " << pwd << endl;
-        cout << "(Yeu cau nguoi dung doi mat khau nay khi dang nhap lan dau tien.)\n";
+        cout << "Mật khẩu được tự động tạo cho tài khoản mới là : " << pwd << endl;
+        cout << "(Yêu cầu người dùng đổi mật khẩu này khi đăng nhập lần đầu tiên)\n";
     }
     string pwdHash = sha256(pwd);
     User newUser;
@@ -563,7 +563,7 @@ void adminCreateUser()
     newUser.needChangePassword = autoPass;
     users.push_back(newUser);
     saveUsersToFile();
-    cout << "Tao tai khoan moi thanh cong.\n";
+    cout << "Tạo tài khoản thành công.\n";
 }
 
 
@@ -659,10 +659,10 @@ void listAllUsers()
 {
     cout << "===== DANH SACH NGUOI DUNG =====\n";
     cout << setw(15) << left << "Username"
-         << setw(25) << left << "Ho ten"
+         << setw(25) << left << "Họ Tên"
          << setw(30) << left << "Email"
-         << setw(10) << left << "So du"
-         << setw(10) << left << "Quyen" << endl;
+         << setw(10) << left << "Số dư"
+         << setw(10) << left << "Quyền" << endl;
     for (const auto &u : users)
     {
         cout << setw(15) << left << u.username
@@ -681,68 +681,57 @@ int main()
     SetConsoleCP(CP_UTF8);
     // Tải dữ liệu người dùng từ tệp vào vector `users`
     int userCount = loadUsersFromFile();
-    cout << "Da tai " << userCount << " nguoi dung.\n";
-    if (userCount == 0)
-    {
+    cout << "Đã tải " << userCount << " người dùng.\n";
+    if (userCount == 0) {
         // Nếu hệ thống chưa có người dùng nào, tự động tạo tài khoản quản trị mặc định
         User admin;
         admin.username = "admin";
         admin.fullname = "Administrator";
-        admin.email = ""; // chưa có email
+        admin.email = "";  // chưa có email
         string defaultPass = "admin";
         admin.passwordHash = sha256(defaultPass);
-        admin.balance = 1000; // khởi tạo ví admin với 1000 điểm để thử giao dịch
+        admin.balance = 1000;       // khởi tạo ví admin với 1000 điểm để thử giao dịch
         admin.isAdmin = true;
-        admin.needChangePassword = true; // yêu cầu đổi mật khẩu do dùng mật khẩu mặc định
+        admin.needChangePassword = true;  // yêu cầu đổi mật khẩu do dùng mật khẩu mặc định
         users.push_back(admin);
         saveUsersToFile();
-        cout << "Da tao tai khoan quan tri mac dinh (username: admin, password: admin). Vui long dang nhap va doi mat khau.\n";
+        cout << "Đã tạo tài khoản quản trị mặc định (username: admin, password: admin). Vui lòng đăng nhập và đổi mật khẩu.\n";
     }
-
     // Vòng lặp vô hạn cho menu đăng nhập/đăng ký
-    while (true)
-    {
+    while (true) {
         cout << "\n=== MENU ===\n";
-        cout << "1. Dang nhap\n";
-        cout << "2. Dang ky\n";
-        cout << "0. Thoat\n";
-        cout << "Lua chon: ";
-        std::string choice;
-        std::getline(std::cin, choice);
-        if (choice == "1")
-        {
+        cout << "1. Đăng nhập\n";
+        cout << "2. Đăng ký\n";
+        cout << "0. Thoát\n";
+        cout << "Lựa chọn: ";
+        string choice;
+        if (!getline(cin, choice)) {
+            // Trường hợp ngắt input (EOF)
+            break;
+        }
+        if (choice == "1") {
             // Xử lý đăng nhập
             int userIdx = loginUser();
-            if (userIdx >= 0)
-            {
+            if (userIdx >= 0) {
                 // Đăng nhập thành công
                 // Nếu tài khoản đang dùng mật khẩu tạm (tự sinh hoặc do admin đặt), bắt buộc đổi mật khẩu mới
-                if (users[userIdx].needChangePassword)
-                {
-                    cout << "\nBan dang su dung mat khau tam thoi. Vui long doi mat khau moi.\n";
+                if (users[userIdx].needChangePassword) {
+                    cout << "\nBạn đang sử dụng mật khẩu tạm thời. Vui lòng đổi mật khẩu mới.\n";
                     string newPwd, confirmPwd;
                     // Bắt người dùng đổi mật khẩu đến khi hợp lệ
-                    do
-                    {
-                        cout << "Mat khau moi: ";
+                    do {
+                        cout << "Mật khẩu mới: ";
                         getline(cin, newPwd);
-                        cout << "Xac nhan mat khau moi: ";
+                        cout << "Xác nhận mật khẩu mới: ";
                         getline(cin, confirmPwd);
-                        if (newPwd.empty())
-                        {
-                            cout << "Mat khau moi khong duoc de trong.\n";
-                        }
-                        else if (newPwd != confirmPwd)
-                        {
-                            cout << "Mat khau xac nhan khong khop.\n";
-                        }
-                        else if (sha256(newPwd) == users[userIdx].passwordHash)
-                        {
+                        if (newPwd.empty()) {
+                            cout << "Mật khẩu mới không được để trống.\n";
+                        } else if (newPwd != confirmPwd) {
+                            cout << "Mật khẩu xác nhận không khớp.\n";
+                        } else if (sha256(newPwd) == users[userIdx].passwordHash) {
                             // Không cho phép trùng với mật khẩu cũ (tạm thời)
-                            cout << "Mat khau moi trung voi mat khau tam thoi. Vui long chon mat khau khac.\n";
-                        }
-                        else
-                        {
+                            cout << "Mật khẩu mới trùng với mật khẩu tạm thời. Vui lòng chọn mật khẩu khác.\n";
+                        } else {
                             // Mật khẩu hợp lệ và khác mật khẩu cũ
                             break;
                         }
@@ -751,133 +740,90 @@ int main()
                     users[userIdx].passwordHash = sha256(newPwd);
                     users[userIdx].needChangePassword = false;
                     saveUsersToFile();
-                    cout << "Doi mat khau thanh cong. Ban da co the su dung he thong.\n";
+                    cout << "Đổi mật khẩu thành công. Bạn đã có thể sử dụng hệ thống.\n";
                 }
                 // Phân chia menu theo loại người dùng (admin hoặc thường)
-                if (users[userIdx].isAdmin)
-                {
+                if (users[userIdx].isAdmin) {
                     // Menu dành cho quản trị viên
-                    while (true)
-                    {
-                        cout << "\n--- MENU QUAN TRI VIEN ---\n";
-                        cout << "1. Xem thong tin ca nhan\n";
-                        cout << "2. Doi mat khau\n";
-                        cout << "3. Cap nhat thong tin ca nhan\n";
-                        cout << "4. Chuyen diem cho nguoi dung\n";
-                        cout << "5. Xem danh sach nguoi dung\n";
-                        cout << "6. Tao tai khoan moi\n";
-                        cout << "7. Xem lich su giao dich\n";
-                        cout << "0. Dang xuat\n";
-                        cout << "Lua chon: ";
+                    while (true) {
+                        cout << "\n--- MENU QUẢN TRỊ VIÊN ---\n";
+                        cout << "1. Xem thông tin cá nhân\n";
+                        cout << "2. Đổi mật khẩu\n";
+                        cout << "3. Cập nhật thông tin cá nhân\n";
+                        cout << "4. Chuyển điểm cho người dùng\n";
+                        cout << "5. Xem danh sách người dùng\n";
+                        cout << "6. Tạo tài khoản mới\n";
+                        cout << "7. Xem lịch sử giao dịch\n";
+                        cout << "0. Đăng xuất\n";
+                        cout << "Lựa chọn: ";
                         string adminChoice;
-                        if (!getline(cin, adminChoice))
-                        {
-                            return 0; // kết thúc chương trình nếu không nhận được input
+                        if (!getline(cin, adminChoice)) {
+                            return 0;  // kết thúc chương trình nếu không nhận được input
                         }
-                        if (adminChoice == "1")
-                        {
+                        if (adminChoice == "1") {
                             viewPersonalInfo(userIdx);
-                        }
-                        else if (adminChoice == "2")
-                        {
+                        } else if (adminChoice == "2") {
                             changePassword(userIdx);
-                        }
-                        else if (adminChoice == "3")
-                        {
+                        } else if (adminChoice == "3") {
                             updatePersonalInfo(userIdx);
-                        }
-                        else if (adminChoice == "4")
-                        {
+                        } else if (adminChoice == "4") {
                             transferPoints(userIdx);
-                        }
-                        else if (adminChoice == "5")
-                        {
+                        } else if (adminChoice == "5") {
                             listAllUsers();
-                        }
-                        else if (adminChoice == "6")
-                        {
+                        } else if (adminChoice == "6") {
                             adminCreateUser();
-                        }
-                        else if (adminChoice == "7")
-                        {
+                        } else if (adminChoice == "7") {
                             viewTransactionLog();
-                        }
-                        else if (adminChoice == "0")
-                        {
-                            cout << "Dang xuat khoi tai khoan quan tri vien.\n";
+                        } else if (adminChoice == "0") {
+                            cout << "Đăng xuất khỏi tài khoản quản trị viên.\n";
                             break;
-                        }
-                        else
-                        {
-                            cout << "Lua chon khong hop le. Vui long thu lai.\n";
+                        } else {
+                            cout << "Lựa chọn không hợp lệ. Vui lòng thử lại.\n";
                         }
                     }
-                }
-                else
-                {
+                } else {
                     // Menu dành cho người dùng thường
-                    while (true)
-                    {
-                        cout << "\n--- MENU NGUOI DUNG ---\n";
-                        cout << "1. Xem thong tin ca nhan\n";
-                        cout << "2. Doi mat khau\n";
-                        cout << "3. Cap nhat thong tin ca nhan\n";
-                        cout << "4. Chuyen diem\n";
-                        cout << "5. Xem lich su giao dich cua toi\n";
-                        cout << "0. Dang xuat\n";
-                        cout << "Lua chon: ";
+                    while (true) {
+                        cout << "\n--- MENU NGƯỜI DÙNG ---\n";
+                        cout << "1. Xem thông tin cá nhân\n";
+                        cout << "2. Đổi mật khẩu\n";
+                        cout << "3. Cập nhật thông tin cá nhân\n";
+                        cout << "4. Chuyển điểm\n";
+                        cout << "5. Xem lịch sử giao dịch của tôi\n";
+                        cout << "0. Đăng xuất\n";
+                        cout << "Lựa chọn: ";
                         string userChoice;
-                        if (!getline(cin, userChoice))
-                        {
+                        if (!getline(cin, userChoice)) {
                             return 0;
                         }
-                        if (userChoice == "1")
-                        {
+                        if (userChoice == "1") {
                             viewPersonalInfo(userIdx);
-                        }
-                        else if (userChoice == "2")
-                        {
+                        } else if (userChoice == "2") {
                             changePassword(userIdx);
-                        }
-                        else if (userChoice == "3")
-                        {
+                        } else if (userChoice == "3") {
                             updatePersonalInfo(userIdx);
-                        }
-                        else if (userChoice == "4")
-                        {
+                        } else if (userChoice == "4") {
                             transferPoints(userIdx);
-                        }
-                        else if (userChoice == "5")
-                        {
+                        } else if (userChoice == "5") {
                             viewMyTransactions(userIdx);
-                        }
-                        else if (userChoice == "0")
-                        {
-                            cout << "Dang xuat khoi tai khoan nguoi dung.\n";
+                        } else if (userChoice == "0") {
+                            cout << "Đăng xuất khỏi tài khoản người dùng.\n";
                             break;
-                        }
-                        else
-                        {
-                            cout << "Lua chon khong hop le. Vui long chon lai.\n";
+                        } else {
+                            cout << "Lựa chọn không hợp lệ. Vui lòng chọn lại.\n";
                         }
                     }
                 }
             }
             // Nếu đăng nhập thất bại, vòng lặp menu chính sẽ tiếp tục (cho phép chọn lại)
-        }
-        else if (choice == "2")
-        {
+        } else if (choice == "2") {
             // Xử lý đăng ký người dùng mới
             registerUser();
-        }
-        else if (choice == "0")
-        {
-            cout << "Thoat chuong trinh. Tam biet!\n";
+        } else if (choice == "0") {
+            cout << "Thoát chương trình. Tạm biệt!\n";
             break;
-        }
-        else
-        {
-            cout << "Lua chon khong hop le. Vui long thu lai.\n";
+        } else {
+            cout << "Lựa chọn không hợp lệ. Vui lòng thử lại.\n";
         }
     }
 
