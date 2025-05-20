@@ -11,10 +11,44 @@
 #include <vector>
 #include <chrono>
 #include <curl/curl.h>
+#include <openssl/evp.h>
+#include <openssl/sha.h>
 
 using namespace std;
 
-size_t payload_source(void *ptr, size_t size, size_t nmemb, void *userp)
+// Hàm băm SHA-256 để lưu mật khẩu an toàn vào hệ thống.
+string sha256(const string& str) {
+    unsigned char hash[EVP_MAX_MD_SIZE];
+    unsigned int hash_len;
+
+    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+    if (!ctx) return "";
+
+    if (1 != EVP_DigestInit_ex(ctx, EVP_sha256(), NULL)) {
+        EVP_MD_CTX_free(ctx);
+        return "";
+    }
+
+    if (1 != EVP_DigestUpdate(ctx, str.c_str(), str.size())) {
+        EVP_MD_CTX_free(ctx);
+        return "";
+    }
+
+    if (1 != EVP_DigestFinal_ex(ctx, hash, &hash_len)) {
+        EVP_MD_CTX_free(ctx);
+        return "";
+    }
+
+    EVP_MD_CTX_free(ctx);
+
+    stringstream ss;
+    for (unsigned int i = 0; i < hash_len; ++i) {
+        ss << hex << setw(2) << setfill('0') << (int)hash[i];
+    }
+    return ss.str();
+}
+// Tao payload de send SMTP mail
+size_t payload_source(void* ptr, size_t size, size_t nmemb, void* userp) 
 {
     const char **payload = (const char **)userp;
     size_t len = strlen(*payload);
@@ -24,9 +58,9 @@ size_t payload_source(void *ptr, size_t size, size_t nmemb, void *userp)
     *payload += len;
     return len;
 }
-bool sendEmailOTP(const string &toEmail, const string &subject, const string &body)
-{
-    CURL *curl;
+
+bool sendEmailOTP(const string& toEmail, const string& subject, const string& body) {
+    CURL* curl;
     CURLcode res = CURLE_OK;
     curl = curl_easy_init();
 
@@ -115,11 +149,9 @@ int loginUser()
         cout << "Ten dang nhap khong ton tai.\n";
         return -1;
     }
-    string hashInput = password;
-    ;
-    if (hashInput != users[idx].passwordHash)
-    {
-        cout << "Mat khau khong dung.\n";
+    string hashInput = sha256(password);
+    if (hashInput != users[idx].passwordHash) {
+        cout << "Mật khẩu không đúng.\n";
         return -1;
     }
     return idx;
@@ -299,7 +331,87 @@ void registerUser()
     cout << "Dang ky tai khoan thanh cong. Ban co the dang nhap bay gio.\n";
 }
 
-// (Dành cho quản trị viên) Tạo tài khoản người dùng mới (có thể là user thường hoặc admin khác)
+
+// Xử lý đăng nhập: kiểm tra tên đăng nhập và mật khẩu băm có khớp trong hệ thống không.
+// Trả về chỉ số người dùng (index trong vector `users`) nếu đăng nhập thành công, hoặc -1 nếu thất bại.
+int loginUser() {
+    return -1;
+}
+
+
+// Đổi mật khẩu cho người dùng đã đăng nhập (idx là vị trí trong vector `users`)
+void changePassword(int idx) {
+     string currentPwd;
+    cout << "Nhap mat khau hien tai: ";
+    getline(cin, currentPwd);
+    string currentHash = currentPwd;
+    if (currentHash != users[idx].passwordHash)
+    {
+        cout << "Mat khau hien tai khong chinh xac.\n";
+        return;
+    }
+    string newPwd, confirmPwd;
+    cout << "Mat khau moi: ";
+    getline(cin, newPwd);
+    cout << "Xac nhan mat khau moi: ";
+    getline(cin, confirmPwd);
+    if (newPwd.empty())
+    {
+        cout << "Mat khau moi khong duoc de trong.\n";
+        return;
+    }
+    if (newPwd != confirmPwd)
+    {
+        cout << "Mat khau xac nhan khong khop.\n";
+        return;
+    }
+    if (newPwd  == users[idx].passwordHash)
+    {
+        cout << "Mat khau moi trung voi mat khau cu. Hay chon mat khau khac.\n";
+        return;
+    }
+    // Cập nhật mật khẩu
+    users[idx].passwordHash = newPwd;
+    users[idx].needChangePassword = false; // sau khi tự đổi mật khẩu thì không cần đổi nữa
+    saveUsersToFile();
+    cout << "Doi mat khau thanh cong.\n";
+}
+
+// Cập nhật thông tin cá nhân (họ tên, email) của người dùng, có xác thực OTP
+void updatePersonalInfo(int idx) {
+    cout << "Ten hien tai: " << users[idx].fullname << ". Nhap ten moi (Enter de giu nguyen): ";
+    string newName;
+    string input;
+    getline(cin, input);
+    if (!input.empty())
+        newName = input;
+    else
+        newName = users[idx].fullname;
+    cout << "Email hien tai: " << users[idx].email << ". Nhap email moi (Enter de giu nguyen): ";
+    string newEmail;
+    input.clear();
+    getline(cin, input);
+    if (!input.empty())
+        newEmail = input;
+    else
+        newEmail = users[idx].email;
+    if (newName == users[idx].fullname && newEmail == users[idx].email)
+    {
+        cout << "Khong co thay doi thong tin.\n";
+        return;
+    }
+    // Yêu cầu xác thực OTP trước khi thay đổi thông tin quan trọng
+    if (!verifyOTP(users[idx].email))
+    {
+        // Nếu OTP sai, hủy thao tác
+        return;
+    }
+    // Cập nhật thông tin nếu OTP đúng
+    users[idx].fullname = newName;
+    users[idx].email = newEmail;
+    saveUsersToFile();
+    cout << "Cap nhat thong tin ca nhan thanh cong.\n";
+}
 void adminCreateUser()
 {
     string username;
@@ -362,14 +474,35 @@ void adminCreateUser()
     cout << "Tao tai khoan moi thanh cong.\n";
 }
 
-// Xử lý đăng nhập: kiểm tra tên đăng nhập và mật khẩu băm có khớp trong hệ thống không.
-// Trả về chỉ số người dùng (index trong vector `users`) nếu đăng nhập thành công, hoặc -1 nếu thất bại.
-// int loginUser() {
-//   return -1;
-//}
-
 // Đổi mật khẩu cho người dùng đã đăng nhập (idx là vị trí trong vector `users`)
+void changePassword(int idx)
+{
+}
 
+// Cập nhật thông tin cá nhân (họ tên, email) của người dùng, có xác thực OTP
+void updatePersonalInfo(int idx)
+{
+}
+
+// Xem toàn bộ lịch sử giao dịch (dành cho quản trị viên)
+void viewTransactionLog()
+{
+}
+
+// Xem lịch sử giao dịch của chính người dùng hiện tại (chỉ liệt kê các giao dịch mà user này gửi hoặc nhận)
+void viewMyTransactions(int idx)
+{
+}
+
+// Xem thông tin tài khoản cá nhân của người dùng (username, họ tên, email, số dư, vai trò)
+void viewPersonalInfo(int idx) {
+    cout << "===== THÔNG TIN TÀI KHOẢN =====\n";
+    cout << "Tên đăng nhập:  " << users[idx].username << endl;
+    cout << "Họ và tên:      " << users[idx].fullname << endl;
+    cout << "Email:          " << users[idx].email << endl;
+    cout << "Số dư (điểm):   " << users[idx].balance << endl;
+    cout << "Loại tài khoản: " << (users[idx].isAdmin ? "Quản trị viên" : "Người dùng thường") << endl;
+}
 
 // Liệt kê danh sách tất cả người dùng trong hệ thống (dành cho quản trị viên)
 void listAllUsers()
@@ -392,8 +525,24 @@ void listAllUsers()
 }
 
 // -------------------- HÀM MAIN (CHƯƠNG TRÌNH CHÍNH) --------------------
-int main()
-{
+int main() {
+    // Tải dữ liệu người dùng từ tệp vào vector `users`
+    int userCount = loadUsersFromFile();
+    if (userCount == 0) {
+        // Nếu hệ thống chưa có người dùng nào, tự động tạo tài khoản quản trị mặc định
+        User admin;
+        admin.username = "admin";
+        admin.fullname = "Administrator";
+        admin.email = "";  // chưa có email
+        string defaultPass = "admin";
+        admin.passwordHash = sha256(defaultPass);
+        admin.balance = 1000;       // khởi tạo ví admin với 1000 điểm để thử giao dịch
+        admin.isAdmin = true;
+        admin.needChangePassword = true;  // yêu cầu đổi mật khẩu do dùng mật khẩu mặc định
+        users.push_back(admin);
+        saveUsersToFile();
+        cout << "Đã tạo tài khoản quản trị mặc định (username: admin, password: admin). Vui lòng đăng nhập và đổi mật khẩu.\n";
+    }
     // Vòng lặp vô hạn cho menu đăng nhập/đăng ký
     while (true)
     {
@@ -403,7 +552,9 @@ int main()
         cout << "0. Thoat\n";
         cout << "Lua Chon: ";
         string choice;
-        std::getline(std::cin, choice);
+        if (!getline(cin, choice)) {
+            break;
+        }
         if (choice == "1")
         {
             // Đăng nhập
