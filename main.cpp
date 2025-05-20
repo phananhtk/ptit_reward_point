@@ -29,8 +29,8 @@ struct User
 };
 
 vector<User> users;
-const string USERS_FILE = "users.txt";          // Tệp lưu thông tin tài khoản người dùng
-const string LOG_FILE   = "transactions.txt";   // Tệp lưu lịch sử giao dịch chuyển điểm
+const string USERS_FILE = "users.txt";      // Tệp lưu thông tin tài khoản người dùng
+const string LOG_FILE = "transactions.txt"; // Tệp lưu lịch sử giao dịch chuyển điểm
 const std::string SENDER_EMAIL = "whitehousecono@gmail.com";
 const std::string SENDER_APP_PASSWORD = "Dungtao666";
 
@@ -80,11 +80,13 @@ void registerUser()
     string username;
     cout << "Tên đăng nhập mới: ";
     getline(cin, username);
-    if (username.empty()) {
+    if (username.empty())
+    {
         cout << "Tên đăng nhập không được bỏ trống.\n";
         return;
     }
-    if (findUserIndex(username) != -1) {
+    if (findUserIndex(username) != -1)
+    {
         cout << "Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.\n";
         return;
     }
@@ -99,13 +101,15 @@ void registerUser()
     cout << "Mật khẩu (nhấn Enter để sử dụng mật khẩu tự động): ";
     getline(cin, pwd);
     bool autoPass = false;
-    if (pwd.empty()) {
+    if (pwd.empty())
+    {
         autoPass = true;
         // Sinh một mật khẩu ngẫu nhiên (8 ký tự bao gồm chữ và số)
         string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         srand(time(NULL));
         string generated;
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 8; ++i)
+        {
             generated.push_back(chars[rand() % chars.size()]);
         }
         pwd = generated;
@@ -121,16 +125,74 @@ void registerUser()
     newUser.passwordHash = pwdHash;
     newUser.balance = 0;
     newUser.isAdmin = false;
-    newUser.needChangePassword = autoPass;  // nếu mật khẩu tự sinh thì đánh dấu yêu cầu đổi mật khẩu lần đầu
+    newUser.needChangePassword = autoPass; // nếu mật khẩu tự sinh thì đánh dấu yêu cầu đổi mật khẩu lần đầu
     users.push_back(newUser);
     saveUsersToFile();
     cout << "Đăng ký tài khoản thành công. Bạn có thể đăng nhập bây giờ.\n";
 }
 
 // (Dành cho quản trị viên) Tạo tài khoản người dùng mới (có thể là user thường hoặc admin khác)
-// void adminCreateUser() {
-
-//}
+void adminCreateUser()
+{
+    string username;
+    cout << "Nhap ten dang nhap cho tai khoan moi: ";
+    getline(cin, username);
+    if (username.empty())
+    {
+        cout << "Ten dang nhap khong duoc de trong.\n";
+        return;
+    }
+    if (findUserIndex(username) != -1)
+    {
+        cout << "Ten dang nhap nay da ton tai. Khong the tao moi.\n";
+        return;
+    }
+    string roleInput;
+    cout << "Tai khoan nay co quyen quan ly (admin)? (y/n): ";
+    getline(cin, roleInput);
+    bool isAdminRole = false;
+    if (!roleInput.empty() && (roleInput[0] == 'y' || roleInput[0] == 'Y'))
+    {
+        isAdminRole = true;
+    }
+    string fullname;
+    cout << "Ten nguoi dung: ";
+    getline(cin, fullname);
+    string email;
+    cout << "Email: ";
+    getline(cin, email);
+    string pwd;
+    cout << "Mat khau (nhan Enter de tu dong tao): ";
+    getline(cin, pwd);
+    bool autoPass = false;
+    if (pwd.empty())
+    {
+        autoPass = true;
+        // Sinh mật khẩu ngẫu nhiên (10 ký tự)
+        string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        srand(time(NULL));
+        string generated;
+        for (int i = 0; i < 10; ++i)
+        {
+            generated.push_back(chars[rand() % chars.size()]);
+        }
+        pwd = generated;
+        cout << "Mat khau duoc tu dong tao cho tai khoan moi la: " << pwd << endl;
+        cout << "(Yeu cau nguoi dung doi mat khau nay khi dang nhap lan dau tien.)\n";
+    }
+    string pwdHash = pwd;
+    User newUser;
+    newUser.username = username;
+    newUser.fullname = fullname;
+    newUser.email = email;
+    newUser.passwordHash = pwdHash;
+    newUser.balance = 0;
+    newUser.isAdmin = isAdminRole;
+    newUser.needChangePassword = autoPass;
+    users.push_back(newUser);
+    saveUsersToFile();
+    cout << "Tao tai khoan moi thanh cong.\n";
+}
 
 // Xử lý đăng nhập: kiểm tra tên đăng nhập và mật khẩu băm có khớp trong hệ thống không.
 // Trả về chỉ số người dùng (index trong vector `users`) nếu đăng nhập thành công, hoặc -1 nếu thất bại.
@@ -184,9 +246,9 @@ int main()
         if (choice == "1")
         {
             // Đăng nhập
-         cout << "Dang nhap thanh cong!\n";
+            cout << "Dang nhap thanh cong!\n";
         }
-        if(choice == "2")
+        if (choice == "2")
         {
             // Đăng ký
             cout << "Dang ky thanh cong!\n";
