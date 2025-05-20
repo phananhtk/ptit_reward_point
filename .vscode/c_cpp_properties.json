@@ -6,6 +6,7 @@
         "${workspaceFolder}/**",
         "C:/msys64/mingw64/include",
         "C:/msys64/mingw64/include/curl",
+        "C:/msys64/mingw64/include/openssl",
         "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.1.0/include"
       ],
       "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
