@@ -678,6 +678,7 @@ int main()
 {
     // Tải dữ liệu người dùng từ tệp vào vector `users`
     int userCount = loadUsersFromFile();
+    cout << "Da tai " << userCount << " nguoi dung.\n";
     if (userCount == 0)
     {
         // Nếu hệ thống chưa có người dùng nào, tự động tạo tài khoản quản trị mặc định
@@ -692,22 +693,19 @@ int main()
         admin.needChangePassword = true; // yêu cầu đổi mật khẩu do dùng mật khẩu mặc định
         users.push_back(admin);
         saveUsersToFile();
-        cout << "Đã tạo tài khoản quản trị mặc định (username: admin, password: admin). Vui lòng đăng nhập và đổi mật khẩu.\n";
+        cout << "Da tao tai khoan quan tri mac dinh (username: admin, password: admin). Vui long dang nhap va doi mat khau.\n";
     }
+
     // Vòng lặp vô hạn cho menu đăng nhập/đăng ký
     while (true)
     {
         cout << "\n=== MENU ===\n";
-        cout << "1. Đăng nhập\n";
-        cout << "2. Đăng ký\n";
-        cout << "0. Thoát\n";
-        cout << "Lựa chọn: ";
-        string choice;
-        if (!getline(cin, choice))
-        {
-            // Trường hợp ngắt input (EOF)
-            break;
-        }
+        cout << "1. Dang nhap\n";
+        cout << "2. Dang ky\n";
+        cout << "0. Thoat\n";
+        cout << "Lua chon: ";
+        std::string choice;
+        std::getline(std::cin, choice);
         if (choice == "1")
         {
             // Xử lý đăng nhập
@@ -718,27 +716,27 @@ int main()
                 // Nếu tài khoản đang dùng mật khẩu tạm (tự sinh hoặc do admin đặt), bắt buộc đổi mật khẩu mới
                 if (users[userIdx].needChangePassword)
                 {
-                    cout << "\nBạn đang sử dụng mật khẩu tạm thời. Vui lòng đổi mật khẩu mới.\n";
+                    cout << "\nBan dang su dung mat khau tam thoi. Vui long doi mat khau moi.\n";
                     string newPwd, confirmPwd;
                     // Bắt người dùng đổi mật khẩu đến khi hợp lệ
                     do
                     {
-                        cout << "Mật khẩu mới: ";
+                        cout << "Mat khau moi: ";
                         getline(cin, newPwd);
-                        cout << "Xác nhận mật khẩu mới: ";
+                        cout << "Xac nhan mat khau moi: ";
                         getline(cin, confirmPwd);
                         if (newPwd.empty())
                         {
-                            cout << "Mật khẩu mới không được để trống.\n";
+                            cout << "Mat khau moi khong duoc de trong.\n";
                         }
                         else if (newPwd != confirmPwd)
                         {
-                            cout << "Mật khẩu xác nhận không khớp.\n";
+                            cout << "Mat khau xac nhan khong khop.\n";
                         }
                         else if (sha256(newPwd) == users[userIdx].passwordHash)
                         {
                             // Không cho phép trùng với mật khẩu cũ (tạm thời)
-                            cout << "Mật khẩu mới trùng với mật khẩu tạm thời. Vui lòng chọn mật khẩu khác.\n";
+                            cout << "Mat khau moi trung voi mat khau tam thoi. Vui long chon mat khau khac.\n";
                         }
                         else
                         {
@@ -750,7 +748,7 @@ int main()
                     users[userIdx].passwordHash = sha256(newPwd);
                     users[userIdx].needChangePassword = false;
                     saveUsersToFile();
-                    cout << "Đổi mật khẩu thành công. Bạn đã có thể sử dụng hệ thống.\n";
+                    cout << "Doi mat khau thanh cong. Ban da co the su dung he thong.\n";
                 }
                 // Phân chia menu theo loại người dùng (admin hoặc thường)
                 if (users[userIdx].isAdmin)
@@ -758,16 +756,16 @@ int main()
                     // Menu dành cho quản trị viên
                     while (true)
                     {
-                        cout << "\n--- MENU QUẢN TRỊ VIÊN ---\n";
-                        cout << "1. Xem thông tin cá nhân\n";
-                        cout << "2. Đổi mật khẩu\n";
-                        cout << "3. Cập nhật thông tin cá nhân\n";
-                        cout << "4. Chuyển điểm cho người dùng\n";
-                        cout << "5. Xem danh sách người dùng\n";
-                        cout << "6. Tạo tài khoản mới\n";
-                        cout << "7. Xem lịch sử giao dịch\n";
-                        cout << "0. Đăng xuất\n";
-                        cout << "Lựa chọn: ";
+                        cout << "\n--- MENU QUAN TRI VIEN ---\n";
+                        cout << "1. Xem thong tin ca nhan\n";
+                        cout << "2. Doi mat khau\n";
+                        cout << "3. Cap nhat thong tin ca nhan\n";
+                        cout << "4. Chuyen diem cho nguoi dung\n";
+                        cout << "5. Xem danh sach nguoi dung\n";
+                        cout << "6. Tao tai khoan moi\n";
+                        cout << "7. Xem lich su giao dich\n";
+                        cout << "0. Dang xuat\n";
+                        cout << "Lua chon: ";
                         string adminChoice;
                         if (!getline(cin, adminChoice))
                         {
@@ -803,12 +801,12 @@ int main()
                         }
                         else if (adminChoice == "0")
                         {
-                            cout << "Đăng xuất khỏi tài khoản quản trị viên.\n";
+                            cout << "Dang xuat khoi tai khoan quan tri vien.\n";
                             break;
                         }
                         else
                         {
-                            cout << "Lựa chọn không hợp lệ. Vui lòng thử lại.\n";
+                            cout << "Lua chon khong hop le. Vui long thu lai.\n";
                         }
                     }
                 }
@@ -817,14 +815,14 @@ int main()
                     // Menu dành cho người dùng thường
                     while (true)
                     {
-                        cout << "\n--- MENU NGƯỜI DÙNG ---\n";
-                        cout << "1. Xem thông tin cá nhân\n";
-                        cout << "2. Đổi mật khẩu\n";
-                        cout << "3. Cập nhật thông tin cá nhân\n";
-                        cout << "4. Chuyển điểm\n";
-                        cout << "5. Xem lịch sử giao dịch của tôi\n";
-                        cout << "0. Đăng xuất\n";
-                        cout << "Lựa chọn: ";
+                        cout << "\n--- MENU NGUOI DUNG ---\n";
+                        cout << "1. Xem thong tin ca nhan\n";
+                        cout << "2. Doi mat khau\n";
+                        cout << "3. Cap nhat thong tin ca nhan\n";
+                        cout << "4. Chuyen diem\n";
+                        cout << "5. Xem lich su giao dich cua toi\n";
+                        cout << "0. Dang xuat\n";
+                        cout << "Lua chon: ";
                         string userChoice;
                         if (!getline(cin, userChoice))
                         {
@@ -852,12 +850,12 @@ int main()
                         }
                         else if (userChoice == "0")
                         {
-                            cout << "Đăng xuất khỏi tài khoản người dùng.\n";
+                            cout << "Dang xuat khoi tai khoan nguoi dung.\n";
                             break;
                         }
                         else
                         {
-                            cout << "Lựa chọn không hợp lệ. Vui lòng chọn lại.\n";
+                            cout << "Lua chon khong hop le. Vui long chon lai.\n";
                         }
                     }
                 }
@@ -871,12 +869,12 @@ int main()
         }
         else if (choice == "0")
         {
-            cout << "Thoát chương trình. Tạm biệt!\n";
+            cout << "Thoat chuong trinh. Tam biet!\n";
             break;
         }
         else
         {
-            cout << "Lựa chọn không hợp lệ. Vui lòng thử lại.\n";
+            cout << "Lua chon khong hop le. Vui long thu lai.\n";
         }
     }
 
