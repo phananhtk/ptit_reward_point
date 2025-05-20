@@ -317,7 +317,7 @@ void registerUser()
         cout << "(Hay luu mat khau nay va **doi lai sau khi dang nhap**.)\n";
     }
     // Băm mật khẩu và lưu thông tin người dùng
-    string pwdHash = pwd;
+    string pwdHash = sha256(pwd);
     User newUser;
     newUser.username = username;
     newUser.fullname = fullname;
@@ -332,11 +332,7 @@ void registerUser()
 }
 
 
-// Xử lý đăng nhập: kiểm tra tên đăng nhập và mật khẩu băm có khớp trong hệ thống không.
-// Trả về chỉ số người dùng (index trong vector `users`) nếu đăng nhập thành công, hoặc -1 nếu thất bại.
-int loginUser() {
-    return -1;
-}
+
 
 
 // Đổi mật khẩu cho người dùng đã đăng nhập (idx là vị trí trong vector `users`)
@@ -344,7 +340,7 @@ void changePassword(int idx) {
      string currentPwd;
     cout << "Nhap mat khau hien tai: ";
     getline(cin, currentPwd);
-    string currentHash = currentPwd;
+    string currentHash = sha256(currentPwd);
     if (currentHash != users[idx].passwordHash)
     {
         cout << "Mat khau hien tai khong chinh xac.\n";
@@ -365,13 +361,13 @@ void changePassword(int idx) {
         cout << "Mat khau xac nhan khong khop.\n";
         return;
     }
-    if (newPwd  == users[idx].passwordHash)
+    if (sha256(newPwd)  == users[idx].passwordHash)
     {
         cout << "Mat khau moi trung voi mat khau cu. Hay chon mat khau khac.\n";
         return;
     }
     // Cập nhật mật khẩu
-    users[idx].passwordHash = newPwd;
+    users[idx].passwordHash = sha256(newPwd);
     users[idx].needChangePassword = false; // sau khi tự đổi mật khẩu thì không cần đổi nữa
     saveUsersToFile();
     cout << "Doi mat khau thanh cong.\n";
@@ -460,7 +456,7 @@ void adminCreateUser()
         cout << "Mat khau duoc tu dong tao cho tai khoan moi la: " << pwd << endl;
         cout << "(Yeu cau nguoi dung doi mat khau nay khi dang nhap lan dau tien.)\n";
     }
-    string pwdHash = pwd;
+    string pwdHash = sha256(pwd);
     User newUser;
     newUser.username = username;
     newUser.fullname = fullname;
@@ -474,25 +470,9 @@ void adminCreateUser()
     cout << "Tao tai khoan moi thanh cong.\n";
 }
 
-// Đổi mật khẩu cho người dùng đã đăng nhập (idx là vị trí trong vector `users`)
-void changePassword(int idx)
-{
-}
+
 
 // Cập nhật thông tin cá nhân (họ tên, email) của người dùng, có xác thực OTP
-void updatePersonalInfo(int idx)
-{
-}
-
-// Xem toàn bộ lịch sử giao dịch (dành cho quản trị viên)
-void viewTransactionLog()
-{
-}
-
-// Xem lịch sử giao dịch của chính người dùng hiện tại (chỉ liệt kê các giao dịch mà user này gửi hoặc nhận)
-void viewMyTransactions(int idx)
-{
-}
 
 // Xem thông tin tài khoản cá nhân của người dùng (username, họ tên, email, số dư, vai trò)
 void viewPersonalInfo(int idx) {
