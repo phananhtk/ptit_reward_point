@@ -24,6 +24,7 @@ size_t payload_source(void* ptr, size_t size, size_t nmemb, void* userp)
     *payload += len;
     return len;
 }
+
 bool sendEmailOTP(const string& toEmail, const string& subject, const string& body) {
     CURL* curl;
     CURLcode res = CURLE_OK;
@@ -290,7 +291,87 @@ void registerUser()
     cout << "Đăng ký tài khoản thành công. Bạn có thể đăng nhập bây giờ.\n";
 }
 
-// (Dành cho quản trị viên) Tạo tài khoản người dùng mới (có thể là user thường hoặc admin khác)
+
+// Xử lý đăng nhập: kiểm tra tên đăng nhập và mật khẩu băm có khớp trong hệ thống không.
+// Trả về chỉ số người dùng (index trong vector `users`) nếu đăng nhập thành công, hoặc -1 nếu thất bại.
+int loginUser() {
+    return -1;
+}
+
+
+// Đổi mật khẩu cho người dùng đã đăng nhập (idx là vị trí trong vector `users`)
+void changePassword(int idx) {
+     string currentPwd;
+    cout << "Nhap mat khau hien tai: ";
+    getline(cin, currentPwd);
+    string currentHash = currentPwd;
+    if (currentHash != users[idx].passwordHash)
+    {
+        cout << "Mat khau hien tai khong chinh xac.\n";
+        return;
+    }
+    string newPwd, confirmPwd;
+    cout << "Mat khau moi: ";
+    getline(cin, newPwd);
+    cout << "Xac nhan mat khau moi: ";
+    getline(cin, confirmPwd);
+    if (newPwd.empty())
+    {
+        cout << "Mat khau moi khong duoc de trong.\n";
+        return;
+    }
+    if (newPwd != confirmPwd)
+    {
+        cout << "Mat khau xac nhan khong khop.\n";
+        return;
+    }
+    if (newPwd  == users[idx].passwordHash)
+    {
+        cout << "Mat khau moi trung voi mat khau cu. Hay chon mat khau khac.\n";
+        return;
+    }
+    // Cập nhật mật khẩu
+    users[idx].passwordHash = newPwd;
+    users[idx].needChangePassword = false; // sau khi tự đổi mật khẩu thì không cần đổi nữa
+    saveUsersToFile();
+    cout << "Doi mat khau thanh cong.\n";
+}
+
+// Cập nhật thông tin cá nhân (họ tên, email) của người dùng, có xác thực OTP
+void updatePersonalInfo(int idx) {
+    cout << "Ten hien tai: " << users[idx].fullname << ". Nhap ten moi (Enter de giu nguyen): ";
+    string newName;
+    string input;
+    getline(cin, input);
+    if (!input.empty())
+        newName = input;
+    else
+        newName = users[idx].fullname;
+    cout << "Email hien tai: " << users[idx].email << ". Nhap email moi (Enter de giu nguyen): ";
+    string newEmail;
+    input.clear();
+    getline(cin, input);
+    if (!input.empty())
+        newEmail = input;
+    else
+        newEmail = users[idx].email;
+    if (newName == users[idx].fullname && newEmail == users[idx].email)
+    {
+        cout << "Khong co thay doi thong tin.\n";
+        return;
+    }
+    // Yêu cầu xác thực OTP trước khi thay đổi thông tin quan trọng
+    if (!verifyOTP(users[idx].email))
+    {
+        // Nếu OTP sai, hủy thao tác
+        return;
+    }
+    // Cập nhật thông tin nếu OTP đúng
+    users[idx].fullname = newName;
+    users[idx].email = newEmail;
+    saveUsersToFile();
+    cout << "Cap nhat thong tin ca nhan thanh cong.\n";
+}
 void adminCreateUser()
 {
     string username;
@@ -353,12 +434,6 @@ void adminCreateUser()
     cout << "Tao tai khoan moi thanh cong.\n";
 }
 
-// Xử lý đăng nhập: kiểm tra tên đăng nhập và mật khẩu băm có khớp trong hệ thống không.
-// Trả về chỉ số người dùng (index trong vector `users`) nếu đăng nhập thành công, hoặc -1 nếu thất bại.
-// int loginUser() {
-//   return -1;
-//}
-
 // Đổi mật khẩu cho người dùng đã đăng nhập (idx là vị trí trong vector `users`)
 void changePassword(int idx)
 {
@@ -380,8 +455,13 @@ void viewMyTransactions(int idx)
 }
 
 // Xem thông tin tài khoản cá nhân của người dùng (username, họ tên, email, số dư, vai trò)
-void viewPersonalInfo(int idx)
-{
+void viewPersonalInfo(int idx) {
+    cout << "===== THÔNG TIN TÀI KHOẢN =====\n";
+    cout << "Tên đăng nhập:  " << users[idx].username << endl;
+    cout << "Họ và tên:      " << users[idx].fullname << endl;
+    cout << "Email:          " << users[idx].email << endl;
+    cout << "Số dư (điểm):   " << users[idx].balance << endl;
+    cout << "Loại tài khoản: " << (users[idx].isAdmin ? "Quản trị viên" : "Người dùng thường") << endl;
 }
 
 // Liệt kê danh sách tất cả người dùng trong hệ thống (dành cho quản trị viên)
