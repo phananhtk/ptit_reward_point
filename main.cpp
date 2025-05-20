@@ -34,18 +34,8 @@ const string LOG_FILE = "transactions.txt"; // Tệp lưu lịch sử giao dịc
 const std::string SENDER_EMAIL = "whitehousecono@gmail.com";
 const std::string SENDER_APP_PASSWORD = "Dungtao666";
 
-// (Dành cho quản trị viên) Tạo tài khoản người dùng mới (có thể là user thường hoặc admin khác)
-void adminCreateUser()
-{
-    cout << "Tạo tài khoản mới thành công.\n";
-}
-
 // Xử lý đăng nhập: kiểm tra tên đăng nhập và mật khẩu có khớp trong hệ thống không.
 // Trả về chỉ số người dùng (index trong vector `users`) nếu đăng nhập thành công, hoặc -1 nếu thất bại.
-int loginUser()
-{
-    return -1;
-}
 
 // Gửi mã OTP đến email người dùng và yêu cầu họ nhập mã để xác nhận.
 bool verifyOTP(const string &email)
@@ -57,14 +47,87 @@ bool verifyOTP(const string &email)
 // Mỗi người dùng là một dòng với các trường cách nhau bởi dấu ';'.
 void saveUsersToFile()
 {
-    return;
+    ofstream fout(USERS_FILE);
+    if (!fout)
+    {
+        cerr << "Lỗi: Không thể ghi tệp dữ liệu người dùng.\n";
+        return;
+    }
+    for (const auto &u : users)
+    {
+        fout << u.username << ";"
+             << (u.isAdmin ? "admin" : "user") << ";" // lưu vai trò
+             << u.passwordHash << ";"
+             << u.balance << ";"
+             << u.fullname << ";"
+             << u.email << ";"
+             << (u.needChangePassword ? "1" : "0") // 1 nếu cần đổi mật khẩu, 0 nếu không
+             << "\n";
+    }
+    fout.close();
 }
 
 // Hàm tải dữ liệu người dùng từ tệp USERS_FILE vào vector `users`.
 // Trả về số lượng người dùng đã tải được.
 int loadUsersFromFile()
 {
-    return 0;
+    users.clear();
+    ifstream fin(USERS_FILE);
+    if (!fin)
+    {
+        // Nếu tệp không tồn tại, tạo tệp mới (trống) để chuẩn bị lưu dữ liệu sau.
+        ofstream fout(USERS_FILE);
+        fout.close();
+        return 0;
+    }
+    string line;
+    while (getline(fin, line))
+    {
+        if (line.empty())
+            continue; // bỏ qua dòng trống (nếu có)
+        User u;
+        string roleStr, balanceStr, needChangeStr;
+        stringstream ss(line);
+        // Đọc lần lượt các trường, ngăn cách bởi dấu ';'
+        getline(ss, u.username, ';');
+        getline(ss, roleStr, ';');
+        getline(ss, u.passwordHash, ';');
+        getline(ss, balanceStr, ';');
+        getline(ss, u.fullname, ';');
+        getline(ss, u.email, ';');
+        getline(ss, needChangeStr, ';');
+        // Loại bỏ khoảng trắng thừa ở đầu/cuối mỗi trường
+        auto trim = [](string &s)
+        {
+            while (!s.empty() && isspace(s.back()))
+                s.pop_back();
+            while (!s.empty() && isspace(s.front()))
+                s.erase(0, 1);
+        };
+        trim(u.username);
+        trim(roleStr);
+        trim(u.passwordHash);
+        trim(balanceStr);
+        trim(u.fullname);
+        trim(u.email);
+        trim(needChangeStr);
+        // Chuyển chuỗi vai trò thành cờ isAdmin
+        u.isAdmin = (roleStr == "admin");
+        // Chuyển chuỗi số dư thành số (long long)
+        try
+        {
+            u.balance = stoll(balanceStr);
+        }
+        catch (...)
+        {
+            u.balance = 0;
+        }
+        // Xác định trạng thái cần đổi mật khẩu
+        u.needChangePassword = (needChangeStr == "1");
+        users.push_back(u);
+    }
+    fin.close();
+    return users.size();
 }
 
 // Tìm vị trí (index) của người dùng trong vector `users` dựa trên `username`.
