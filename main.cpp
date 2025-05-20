@@ -9,13 +9,67 @@
 #include <cstdlib>
 #include <cctype>
 #include <curl/curl.h>
+#include <vector>
+#include <chrono>
+#include <curl/curl.h>
 
 using namespace std;
 
-bool sendEmailOTP()
+size_t payload_source(void* ptr, size_t size, size_t nmemb, void* userp) 
 {
+    const char** payload = (const char**)userp;
+    size_t len = strlen(*payload);
+    if (len == 0) return 0;
+    memcpy(ptr, *payload, len);
+    *payload += len;
+    return len;
+}
+bool sendEmailOTP(const string& toEmail, const string& subject, const string& body) {
+    CURL* curl;
+    CURLcode res = CURLE_OK;
+    curl = curl_easy_init();
+
+    if (!curl) return false;
+
+    // Replace with your Gmail and App Password
+    const string fromEmail = "phananh1304@gmail.com";
+    const string appPassword = "dbec imyt kkqm lpaw";
+
+    string fullPayload =
+        "To: " + toEmail + "\r\n" +
+        "From: " + fromEmail + "\r\n" +
+        "Subject: " + subject + "\r\n" +
+        "\r\n" + body + "\r\n";
+
+    const char* payload = fullPayload.c_str();
+
+    curl_easy_setopt(curl, CURLOPT_URL, "smtp://smtp.gmail.com:587");
+    curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
+    curl_easy_setopt(curl, CURLOPT_USERNAME, fromEmail.c_str());
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, appPassword.c_str());
+    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, ("<" + fromEmail + ">").c_str());
+
+    struct curl_slist* recipients = NULL;
+    recipients = curl_slist_append(recipients, ("<" + toEmail + ">").c_str());
+    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+    curl_easy_setopt(curl, CURLOPT_READDATA, &payload);
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+
+    res = curl_easy_perform(curl);
+
+    curl_slist_free_all(recipients);
+    curl_easy_cleanup(curl);
+
+    if (res != CURLE_OK) {
+        cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << endl;
+        return false;
+    }
+
     return true;
 }
+
 
 // Cấu trúc lưu thông tin một người dùng trong hệ thống
 struct User
@@ -37,10 +91,44 @@ const std::string SENDER_APP_PASSWORD = "Dungtao666";
 
 // Xử lý đăng nhập: kiểm tra tên đăng nhập và mật khẩu có khớp trong hệ thống không.
 // Trả về chỉ số người dùng (index trong vector `users`) nếu đăng nhập thành công, hoặc -1 nếu thất bại.
+int loginUser() {
+    string username;
+    cout << "Tên đăng nhập: ";
+    getline(cin, username);
+    string password;
+    cout << "Mật khẩu: ";
+    getline(cin, password);
+    int idx = findUserIndex(username);
+    if (idx == -1) {
+        cout << "Tên đăng nhập không tồn tại.\n";
+        return -1;
+    }
+    string hashInput = password;
+    if (hashInput != users[idx].passwordHash) {
+        cout << "Mật khẩu không đúng.\n";
+        return -1;
+    }
+    return idx;
+}
 
 // Gửi mã OTP đến email người dùng và yêu cầu họ nhập mã để xác nhận.
-bool verifyOTP(const string &email)
-{
+
+bool verifyOTP(const string &email) {
+    // Sinh ngẫu nhiên một mã OTP 6 chữ số
+    int otpCode = 100000 + rand() % 900000;
+    // Thông báo gửi OTP
+    sendEmailOTP(email, "Mã OTP", std::to_string(otpCode));
+    cout << "Mã OTP đã được gửi đến email của bạn";
+    if (!email.empty()) {
+        cout << " (" << email << ")";
+    }
+    cout << "Nhập mã OTP để xác nhận: ";
+    string input;
+    getline(cin, input);
+    if (input != to_string(otpCode)) {
+        cout << "Mã OTP không đúng. Hủy thao tác.\n";
+        return false;
+    }
     return true;
 }
 
