@@ -1,9 +1,11 @@
 # WalletSystem: Hệ Thống Quản Lý Điểm Thưởng
 
 ## Tổng Quan
+
 WalletSystem là một ứng dụng dòng lệnh để quản lý tài khoản người dùng và ví điểm thưởng. Hệ thống hỗ trợ đăng ký, đăng nhập, quản lý mật khẩu, chuyển điểm và ghi lại lịch sử giao dịch. Mật khẩu được bảo mật bằng hàm băm, và các thao tác nhạy cảm được xác thực bằng OTP. Hệ thống phân biệt giữa người dùng thường và quản trị viên, với quản trị viên có thêm quyền như tạo tài khoản và xem toàn bộ lịch sử giao dịch.
 
 ## Tính Năng
+
 - **Quản Lý Người Dùng**: Đăng ký, đăng nhập và quản lý tài khoản (người dùng thường và quản trị viên).
 - **Bảo Mật Mật Khẩu**: Hỗ trợ tạo mật khẩu tự động và yêu cầu đổi mật khẩu cho tài khoản mới.
 - **Xác Thực OTP**: Gửi OTP qua email để xác minh khi đổi thông tin cá nhân hoặc chuyển điểm.
@@ -12,6 +14,7 @@ WalletSystem là một ứng dụng dòng lệnh để quản lý tài khoản n
 - **Phân Quyền**: Quản trị viên có thể tạo tài khoản, xem danh sách người dùng và lịch sử giao dịch.
 
 ## Đóng Góp Nhóm
+
 1. **Phan Anh**:
    - Chuẩn bị dự án, viết hàm `main`.
    - Xử lý đăng nhập (`loginUser`), tạo tài khoản quản trị mặc định.
@@ -31,13 +34,14 @@ WalletSystem là một ứng dụng dòng lệnh để quản lý tài khoản n
    - Xem toàn bộ lịch sử giao dịch (`viewTransactionLog`).
    - Xem lịch sử giao dịch cá nhân (`viewMyTransactions`).
 
-------------------
+---
 
 # Hướng Dẫn Cài Đặt và Cấu Hình Dự Án WalletSystem
 
 Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi trường, thư viện OpenSSL và cURL, cũng như build và chạy chương trình trên Windows (với VSCode) và macOS (với Xcode).
 
 ## Điều Kiện Tiền Tố
+
 - **Windows**: Windows 10 hoặc cao hơn, Visual Studio Code, MSYS2, MinGW-w64.
 - **macOS**: macOS Catalina 10.15 hoặc cao hơn, Xcode, Homebrew.
 - **Thư viện**: OpenSSL, cURL.
@@ -45,25 +49,46 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
 ## Cài Đặt trên Windows (VSCode)
 
 ### 1. Cài Đặt MSYS2 và MinGW-w64
+
 1. Tải và cài đặt MSYS2 từ [msys2.org](https://www.msys2.org/).
 2. Mở terminal MSYS2, cập nhật gói và cài đặt công cụ:
+
    ```
    pacman -Syu
+   ```
+
+   - Nếu được yêu cầu đóng terminal, đóng và mở lại, sau đó chạy lại lệnh trên.
+
+   ```
    pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb
    ```
+
 3. Kiểm tra phiên bản:
    ```
    g++ --version
    ```
+   4.Thêm MinGW-w64 vào biến PATH của Windows:
+
+- Nhấn **Win + R**, gõ `sysdm.cpl` để mở **System Properties**.
+- Chọn **Advanced ** > **Environment Variables**
+- Trong **System Variables**, **tìm Path**, chỉnh sửa và thêm: `C:\msys64\mingw64\bin`.
+- Mở terminal mới, kiểm tra phiên bản:
+
+  ```
+  g++ --version
+  ```
 
 ### 2. Cài Đặt Thư Viện OpenSSL và cURL
+
 1. Cài đặt OpenSSL và cURL qua MSYS2:
    ```
    pacman -S mingw-w64-x86_64-openssl mingw-w64-x86_64-curl
    ```
 
 ### 3. Cấu Hình Makefile
+
 1. Đảm bảo tệp `Makefile` trong thư mục dự án có nội dung:
+
    ```
    # Makefile cho WalletSystem
    OPENSSL_PREFIX = /mingw64
@@ -84,6 +109,7 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
    ```
 
 ### 4. Build và Chạy
+
 1. Mở terminal trong thư mục dự án, chạy:
    ```
    make
@@ -98,6 +124,7 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
 ## Cài Đặt trên macOS (Xcode)
 
 ### 1. Cài Đặt Homebrew và Công Cụ
+
 1. Cài đặt Homebrew (nếu chưa có):
    ```
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -113,6 +140,7 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
    ```
 
 ### 2. Cài Đặt Thư Viện OpenSSL và cURL
+
 1. Cài đặt OpenSSL và cURL qua Homebrew:
    ```
    brew install openssl@3
@@ -125,7 +153,9 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
    ```
 
 ### 3. Cấu Hình Makefile
+
 1. Đảm bảo tệp `Makefile` trong thư mục dự án có nội dung:
+
    ```
    # Makefile cho WalletSystem
    OPENSSL_PREFIX = /opt/homebrew/opt/openssl@3
@@ -144,9 +174,11 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
    clean:
        rm -f $(TARGET)
    ```
+
    - Nếu sử dụng Intel-based Mac, thay `OPENSSL_PREFIX = /usr/local/opt/openssl@3`.
 
 ### 4. Cấu Hình Xcode
+
 1. Mở Xcode, tạo dự án mới:
    - Chọn **File > New > Project > macOS > Command Line Tool**, đặt tên là `WalletSystem`.
    - Thêm tệp `main.cpp` và `Makefile` vào dự án.
@@ -163,6 +195,7 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
    ```
 
 ### 5. Build và Chạy
+
 1. Trong Xcode, nhấn **Product > Build** (`Cmd+B`) để build.
 2. Chạy chương trình:
    - Nhấn **Product > Run** (`Cmd+R`), hoặc chạy từ terminal:
@@ -172,6 +205,7 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
    - Đảm bảo tệp `users.txt` nằm trong cùng thư mục với `wallet_system`.
 
 ## Xử Lý Lỗi
+
 - **Windows**:
   - **Thiếu DLL**: Sao chép từ `/mingw64/bin` vào thư mục chứa `wallet_system.exe`.
   - **Lỗi Build**: Kiểm tra đường dẫn OpenSSL trong `Makefile` hoặc cài lại thư viện:
@@ -188,6 +222,7 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
   - **Lỗi Chạy**: Đảm bảo định dạng `users.txt` đúng và tệp nằm trong thư mục chứa `wallet_system`.
 
 ## Ghi Chú
+
 - Tài khoản quản trị mặc định: `username: admin`, `password: admin` (yêu cầu đổi mật khẩu khi đăng nhập lần đầu).
 - Cập nhật Homebrew (macOS): `brew update`.
 - Cập nhật MSYS2 (Windows): `pacman -Syu`.
