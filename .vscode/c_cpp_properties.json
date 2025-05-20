@@ -3,7 +3,11 @@
     {
       "name": "windows-gcc-x64",
       "includePath": [
-        "${workspaceFolder}/**"
+        "${workspaceFolder}/**",
+        "C:/vcpkg/installed/x64-windows/include",
+        "C:/vcpkg/installed/x64-windows/include/openssl",
+        "C:/vcpkg/installed/x64-windows/include/curl",
+        "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.1.0/include"
       ],
       "compilerPath": "C:/msys64/mingw64/bin/gcc.exe",
       "cStandard": "${default}",
