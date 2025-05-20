@@ -14,8 +14,8 @@ Thành Viên dự án
   - Hàm cho quản trị viên tạo tài khoản mới `adminCreateUser`
   - Hàm tải dữ liệu người dùng từ tệp `users.txt` `loadUsersFromFile()`
   - Hàm tra cứu người dùng `findUserIndex`
+  - Hàm liệt kê tất cả người dùng trong hệ thống `listAllUsers`
 3. Nguyễn Tùng
-  -  Hàm liệt kê tất cả người dùng trong hệ thống `listAllUsers`
   - Hàm xem thông tin tài khoản cá nhân `viewPersonalInfo`
   - Hàm đổi mật khẩu cho người dùng đã đăng nhập `changePassword`
   - Hàm cập nhật thông tin cá nhân `updatePersonalInfo`
