@@ -19,7 +19,8 @@ size_t payload_source(void* ptr, size_t size, size_t nmemb, void* userp) {
     return len;
 }
 
-bool sendEmailOTP() {
+bool sendEmailOTP(const string& toEmail, const string& subject, const string& body)
+ {
     CURL* curl;
     CURLcode res = CURLE_OK;
     curl = curl_easy_init();
