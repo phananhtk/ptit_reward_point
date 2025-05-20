@@ -134,6 +134,13 @@ int loadUsersFromFile()
 // Trả về -1 nếu không tìm thấy.
 int findUserIndex(const string &username)
 {
+    for (size_t i = 0; i < users.size(); ++i)
+    {
+        if (users[i].username == username)
+        {
+            return (int)i;
+        }
+    }
     return -1;
 }
 
@@ -291,6 +298,21 @@ void viewPersonalInfo(int idx)
 // Liệt kê danh sách tất cả người dùng trong hệ thống (dành cho quản trị viên)
 void listAllUsers()
 {
+    cout << "===== DANH SACH NGUOI DUNG =====\n";
+    cout << setw(15) << left << "Username"
+         << setw(25) << left << "Ho ten"
+         << setw(30) << left << "Email"
+         << setw(10) << left << "So du"
+         << setw(10) << left << "Quyen" << endl;
+    for (const auto &u : users)
+    {
+        cout << setw(15) << left << u.username
+             << setw(25) << left << u.fullname
+             << setw(30) << left << u.email
+             << setw(10) << left << u.balance
+             << setw(10) << left << (u.isAdmin ? "Admin" : "User")
+             << endl;
+    }
 }
 
 // -------------------- HÀM MAIN (CHƯƠNG TRÌNH CHÍNH) --------------------
