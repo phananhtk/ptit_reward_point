@@ -1,11 +1,28 @@
 # ptit_reward_point
 Reward Point Management
 Thành Viên dự án 
-1. Phan Anh
+1. Phan Anh 
+  - chuẩn bị dự án 
+  - viết hàm main 
+  - Hàm xử lý đăng nhập người dùng `loginUser`
+  - chức năng tạo tài khoản tự động (role admin) khi chạy chương trình lần đầu
+  - xử lí chức năng gửi OTP về email với thư viện "CURL" `sendEmailOTP`  ` verifyOTP` 
+  - cài đặt thư viện liên quan
+  - các hàm đã xử lí : `saveUsersToFile` , 
 2. Tiến Dũng
+  - Đăng kí user `registerUser`
+  - Hàm cho quản trị viên tạo tài khoản mới `adminCreateUser`
+  - Hàm tải dữ liệu người dùng từ tệp `users.txt` `loadUsersFromFile()`
+  - Hàm tra cứu người dùng `findUserIndex`
 3. Nguyễn Tùng
+  -  Hàm liệt kê tất cả người dùng trong hệ thống `listAllUsers`
+  - Hàm xem thông tin tài khoản cá nhân `viewPersonalInfo`
+  - Hàm đổi mật khẩu cho người dùng đã đăng nhập `changePassword`
+  - Hàm cập nhật thông tin cá nhân `updatePersonalInfo`
 4. Dương Lê
-
+  - Hàm chuyển điểm `transferPoints`
+  - Hàm xem toàn bộ lịch sử giao dịch (dành cho quản trị viên) `viewTransactionLog`
+  - Hàm xem lịch sử giao dịch của người dùng `viewMyTransactions`
 ------------------
 # Hướng Dẫn Chi Tiết Cài Đặt và Cấu Hình Dự Án WalletSystem
 
