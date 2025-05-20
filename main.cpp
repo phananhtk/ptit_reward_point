@@ -5,10 +5,63 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <curl/curl.h>
 
 using namespace std;
 
+// Tao payload de send SMTP mail
+size_t payload_source(void* ptr, size_t size, size_t nmemb, void* userp) {
+    const char** payload = (const char**)userp;
+    size_t len = strlen(*payload);
+    if (len == 0) return 0;
+    memcpy(ptr, *payload, len);
+    *payload += len;
+    return len;
+}
+
 bool sendEmailOTP() {
+    CURL* curl;
+    CURLcode res = CURLE_OK;
+    curl = curl_easy_init();
+
+    if (!curl) return false;
+
+    // Replace with your Gmail and App Password
+    const string fromEmail = "phananh1304@gmail.com";
+    const string appPassword = "dbec imyt kkqm lpaw";
+
+    string fullPayload =
+        "To: " + toEmail + "\r\n" +
+        "From: " + fromEmail + "\r\n" +
+        "Subject: " + subject + "\r\n" +
+        "\r\n" + body + "\r\n";
+
+    const char* payload = fullPayload.c_str();
+
+    curl_easy_setopt(curl, CURLOPT_URL, "smtp://smtp.gmail.com:587");
+    curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
+    curl_easy_setopt(curl, CURLOPT_USERNAME, fromEmail.c_str());
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, appPassword.c_str());
+    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, ("<" + fromEmail + ">").c_str());
+
+    struct curl_slist* recipients = NULL;
+    recipients = curl_slist_append(recipients, ("<" + toEmail + ">").c_str());
+    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+    curl_easy_setopt(curl, CURLOPT_READDATA, &payload);
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+
+    res = curl_easy_perform(curl);
+
+    curl_slist_free_all(recipients);
+    curl_easy_cleanup(curl);
+
+    if (res != CURLE_OK) {
+        cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << endl;
+        return false;
+    }
+
     return true;
 }
 
@@ -56,6 +109,21 @@ int loginUser() {
 
 // Gửi mã OTP đến email người dùng và yêu cầu họ nhập mã để xác nhận.
 bool verifyOTP(const string &email) {
+    // Sinh ngẫu nhiên một mã OTP 6 chữ số
+    int otpCode = 100000 + rand() % 900000;
+    // Thông báo gửi OTP
+    sendEmailOTP(email, "Mã OTP", std::to_string(otpCode));
+    cout << "Mã OTP đã được gửi đến email của bạn";
+    if (!email.empty()) {
+        cout << " (" << email << ")";
+    }
+    cout << "Nhập mã OTP để xác nhận: ";
+    string input;
+    getline(cin, input);
+    if (input != to_string(otpCode)) {
+        cout << "Mã OTP không đúng. Hủy thao tác.\n";
+        return false;
+    }
     return true;
 }
 
