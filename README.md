@@ -64,11 +64,27 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
      g++ --version
      ```
 
-### 2. Cài Đặt Thư Viện OpenSSL và cURL
-1. Cài đặt OpenSSL và cURL qua MSYS2:
+### 2. Cài Đặt vcpkg và Thư Viện OpenSSL, cURL
+1. Mở Command Prompt, clone vcpkg:
    ```
-   pacman -S mingw-w64-x86_64-openssl mingw-w64-x86_64-curl
+   git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+   cd C:\vcpkg
    ```
+2. Khởi tạo vcpkg:
+   ```
+   bootstrap-vcpkg.bat
+   ```
+3. Cài đặt OpenSSL và cURL:
+   ```
+   vcpkg install openssl:x64-windows
+   vcpkg install curl:x64-windows
+   ```
+4. Tích hợp vcpkg với hệ thống:
+   ```
+   vcpkg integrate project
+   ```
+5. Kiểm tra thư viện:
+   - OpenSSL và cURL sẽ được cài vào `C:\vcpkg\installed\x64-windows`. Đảm bảo thư mục `include\openssl`, `include\curl`, và `lib` tồn tại.
 
 ### 3. Cấu Hình Makefile
 1. Đảm bảo tệp `Makefile` trong thư mục dự án có nội dung:
@@ -125,8 +141,29 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
    brew --prefix openssl@3
    brew --prefix curl
    ```
-
-### 3. Cấu Hình Makefile
+### 3. Cài Đặt  Thư Viện OpenSSL, cURL với vcpkg
+1. Mở terminal, clone vcpkg:
+   ```
+   git clone https://github.com/microsoft/vcpkg.git ~/vcpkg
+   cd ~/vcpkg
+   ```
+2. Khởi tạo vcpkg:
+   ```
+   ./bootstrap-vcpkg.sh
+   ```
+3. Cài đặt OpenSSL và cURL:
+   ```
+   ./vcpkg install openssl:x64-osx
+   ./vcpkg install curl:x64-osx
+   ```
+4. Tích hợp vcpkg với hệ thống:
+   ```
+   ./vcpkg integrate project
+   ```
+5. Kiểm tra thư viện:
+   - OpenSSL và cURL sẽ được cài vào `~/vcpkg/installed/x64-osx`. Đảm bảo thư mục `include\openssl`, `include\curl`, và `lib` tồn tại.
+   
+### 4. Cấu Hình Makefile
 1. Đảm bảo tệp `Makefile` trong thư mục dự án có nội dung:
    ```
    # Makefile cho WalletSystem
@@ -148,7 +185,7 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
    ```
    - Nếu sử dụng Intel-based Mac, thay `OPENSSL_PREFIX = /usr/local/opt/openssl@3`.
 
-### 4. Cấu Hình Xcode
+### 5. Cấu Hình Xcode
 1. Mở Xcode, tạo dự án mới:
    - Chọn **File > New > Project > macOS > Command Line Tool**, đặt tên là `WalletSystem`.
    - Thêm tệp `main.cpp` và `Makefile` vào dự án.
@@ -164,7 +201,7 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
    make
    ```
 
-### 5. Build
+### 6. Build
 1. Trong Xcode, nhấn **Product > Build** (`Cmd+B`) để build.
 
 ## Mô tả Cách Chạy Chương Trình
