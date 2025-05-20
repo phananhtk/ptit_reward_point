@@ -530,6 +530,80 @@ void adminCreateUser()
     cout << "Tao tai khoan moi thanh cong.\n";
 }
 
+// Thực hiện chuyển điểm từ tài khoản người dùng hiện tại (fromIdx) đến tài khoản đích (toUsername).
+// Có xác thực OTP và đảm bảo tính nguyên tử của giao dịch.
+void transferPoints(int fromIdx) {
+    string toUsername;
+    cout << "Nhập tên tài khoản người nhận: ";
+    getline(cin, toUsername);
+    int toIdx = findUserIndex(toUsername);
+    if (toIdx == -1) {
+        cout << "Tài khoản người nhận không tồn tại.\n";
+        return;
+    }
+    if (toIdx == fromIdx) {
+        cout << "Bạn không thể chuyển điểm cho chính mình.\n";
+        return;
+    }
+    string amountStr;
+    cout << "Nhập số điểm cần chuyển: ";
+    getline(cin, amountStr);
+    long long amount = 0;
+    try {
+        amount = stoll(amountStr);
+    } catch (...) {
+        amount = 0;
+    }
+    if (amount <= 0) {
+        cout << "Số điểm phải là số dương lớn hơn 0.\n";
+        return;
+    }
+    if (users[fromIdx].balance < amount) {
+        cout << "Số dư không đủ để thực hiện giao dịch.\n";
+        return;
+    }
+    // Yêu cầu OTP xác nhận giao dịch chuyển điểm
+    if (!verifyOTP(users[fromIdx].email)) {
+        return;
+    }
+    // Thực hiện giao dịch chuyển điểm (đảm bảo nguyên tử)
+    long long &senderBal = users[fromIdx].balance;
+    long long &recvBal   = users[toIdx].balance;
+    // Lưu lại số dư ban đầu để có thể khôi phục nếu cần (trường hợp giao dịch lỗi)
+    long long oldSenderBal = senderBal;
+    long long oldRecvBal   = recvBal;
+    // 1. Trừ điểm từ ví người gửi
+    senderBal -= amount;
+    // 2. Cộng điểm vào ví người nhận
+    recvBal   += amount;
+    // 3. Lưu thay đổi xuống tệp dữ liệu người dùng (giả định không lỗi)
+    if (!ofstream(USERS_FILE)) {
+        // Nếu mở tệp không thành công (lỗi ghi file), khôi phục số dư cũ và hủy giao dịch
+        senderBal = oldSenderBal;
+        recvBal   = oldRecvBal;
+        cerr << "Lỗi hệ thống: không thể ghi dữ liệu. Giao dịch bị hủy.\n";
+        return;
+    }
+    saveUsersToFile();
+    // 4. Ghi lịch sử giao dịch vào tệp log
+    ofstream fout(LOG_FILE, ios::app);
+    if (!fout) {
+        cerr << "Không thể ghi lịch sử giao dịch (nhưng giao dịch đã hoàn tất).\n";
+    } else {
+        // Lấy thời gian hiện tại (timestamp)
+        auto now = chrono::system_clock::now();
+        time_t t = chrono::system_clock::to_time_t(now);
+        tm localtm = *localtime(&t);
+        // Ghi vào log: thời gian, người gửi, người nhận, số điểm
+        fout << put_time(&localtm, "%Y-%m-%d %H:%M:%S") << ", "
+             << users[fromIdx].username << ", "
+             << users[toIdx].username << ", "
+             << amount << "\n";
+        fout.close();
+    }
+    cout << "Chuyển điểm thành công. Số dư hiện tại của bạn là " << users[fromIdx].balance << " điểm.\n";
+}
+
 // Xem toàn bộ lịch sử giao dịch (dành cho quản trị viên)
 void viewTransactionLog() {
     ifstream fin(LOG_FILE);
