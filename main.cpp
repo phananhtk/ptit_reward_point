@@ -181,7 +181,38 @@ int loginUser() {
 
 // Đổi mật khẩu cho người dùng đã đăng nhập (idx là vị trí trong vector `users`)
 void changePassword(int idx) {
+    string currentPwd;
+    cout << "Nhập mật khẩu hiện tại: ";
+    getline(cin, currentPwd);
+    string currentHash = currentPwd;
+    if (currentHash != users[idx].passwordHash) {
+        cout << "Mật khẩu hiện tại không chính xác.\n";
+        return;
+    }
+    string newPwd, confirmPwd;
+    cout << "Mật khẩu mới: ";
+    getline(cin, newPwd);
+    cout << "Xác nhận mật khẩu mới: ";
+    getline(cin, confirmPwd);
+    if (newPwd.empty()) {
+        cout << "Mật khẩu mới không được để trống.\n";
+        return;
+    }
+    if (newPwd != confirmPwd) {
+        cout << "Mật khẩu xác nhận không khớp.\n";
+        return;
+    }
+    if (newPwd == users[idx].passwordHash) {
+        cout << "Mật khẩu mới trùng với mật khẩu cũ. Hãy chọn mật khẩu khác.\n";
+        return;
+    }
+    // Cập nhật mật khẩu
+    users[idx].passwordHash = newPwd;
+    users[idx].needChangePassword = false; // sau khi tự đổi mật khẩu thì không cần đổi nữa
+    saveUsersToFile();
+    cout << "Đổi mật khẩu thành công.\n";
 }
+
 
 // Cập nhật thông tin cá nhân (họ tên, email) của người dùng, có xác thực OTP
 void updatePersonalInfo(int idx) {
