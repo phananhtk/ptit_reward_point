@@ -104,6 +104,18 @@ void updatePersonalInfo(int idx) {
 
 // Xem toàn bộ lịch sử giao dịch (dành cho quản trị viên)
 void viewTransactionLog() {
+    ifstream fin(LOG_FILE);
+    if (!fin) {
+        cout << "Không có lịch sử giao dịch nào.\n";
+        return;
+    }
+    cout << "===== LỊCH SỬ GIAO DỊCH HỆ THỐNG =====\n";
+    string line;
+    while (getline(fin, line)) {
+        cout << line << endl;
+    }
+    fin.close();
+
 }
 
 // Xem lịch sử giao dịch của chính người dùng hiện tại (chỉ liệt kê các giao dịch mà user này gửi hoặc nhận)
