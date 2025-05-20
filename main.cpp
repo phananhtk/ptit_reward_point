@@ -17,24 +17,29 @@
 using namespace std;
 
 // Hàm băm SHA-256 để lưu mật khẩu an toàn vào hệ thống.
-string sha256(const string& str) {
+string sha256(const string &str)
+{
     unsigned char hash[EVP_MAX_MD_SIZE];
     unsigned int hash_len;
 
-    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
-    if (!ctx) return "";
+    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+    if (!ctx)
+        return "";
 
-    if (1 != EVP_DigestInit_ex(ctx, EVP_sha256(), NULL)) {
+    if (1 != EVP_DigestInit_ex(ctx, EVP_sha256(), NULL))
+    {
         EVP_MD_CTX_free(ctx);
         return "";
     }
 
-    if (1 != EVP_DigestUpdate(ctx, str.c_str(), str.size())) {
+    if (1 != EVP_DigestUpdate(ctx, str.c_str(), str.size()))
+    {
         EVP_MD_CTX_free(ctx);
         return "";
     }
 
-    if (1 != EVP_DigestFinal_ex(ctx, hash, &hash_len)) {
+    if (1 != EVP_DigestFinal_ex(ctx, hash, &hash_len))
+    {
         EVP_MD_CTX_free(ctx);
         return "";
     }
@@ -42,13 +47,14 @@ string sha256(const string& str) {
     EVP_MD_CTX_free(ctx);
 
     stringstream ss;
-    for (unsigned int i = 0; i < hash_len; ++i) {
+    for (unsigned int i = 0; i < hash_len; ++i)
+    {
         ss << hex << setw(2) << setfill('0') << (int)hash[i];
     }
     return ss.str();
 }
 // Tao payload de send SMTP mail
-size_t payload_source(void* ptr, [[maybe_unused]] size_t size, [[maybe_unused]] size_t nmemb, void* userp)
+size_t payload_source(void *ptr, [[maybe_unused]] size_t size, [[maybe_unused]] size_t nmemb, void *userp)
 {
     const char **payload = (const char **)userp;
     size_t len = strlen(*payload);
@@ -59,8 +65,9 @@ size_t payload_source(void* ptr, [[maybe_unused]] size_t size, [[maybe_unused]] 
     return len;
 }
 
-bool sendEmailOTP(const string& toEmail, const string& subject, const string& body) {
-    CURL* curl;
+bool sendEmailOTP(const string &toEmail, const string &subject, const string &body)
+{
+    CURL *curl;
     CURLcode res = CURLE_OK;
     curl = curl_easy_init();
 
@@ -125,9 +132,12 @@ const string LOG_FILE = "transactions.txt"; // Tệp lưu lịch sử giao dịc
 
 // Tìm vị trí (index) của người dùng trong vector `users` dựa trên `username`.
 // Trả về -1 nếu không tìm thấy.
-int findUserIndex(const string &username) {
-    for (size_t i = 0; i < users.size(); ++i) {
-        if (users[i].username == username) {
+int findUserIndex(const string &username)
+{
+    for (size_t i = 0; i < users.size(); ++i)
+    {
+        if (users[i].username == username)
+        {
             return (int)i;
         }
     }
@@ -151,7 +161,8 @@ int loginUser()
         return -1;
     }
     string hashInput = sha256(password);
-    if (hashInput != users[idx].passwordHash) {
+    if (hashInput != users[idx].passwordHash)
+    {
         cout << "Mật khẩu không đúng.\n";
         return -1;
     }
@@ -162,7 +173,7 @@ int loginUser()
 
 bool verifyOTP(const string &email)
 {
-   // Sinh ngẫu nhiên một mã OTP 6 chữ số
+    // Sinh ngẫu nhiên một mã OTP 6 chữ số
     int otpCode = 100000 + rand() % 900000;
     // Thông báo (giả lập) gửi OTP
     sendEmailOTP(email, "Ma OTP", std::to_string(otpCode));
@@ -274,7 +285,7 @@ int loadUsersFromFile()
 // Chức năng đăng ký tài khoản mới cho người dùng thường
 void registerUser()
 {
-     string username;
+    string username;
     cout << "Ten dang nhap moi: ";
     getline(cin, username);
     if (username.empty())
@@ -329,11 +340,13 @@ void registerUser()
 }
 
 // Đổi mật khẩu cho người dùng đã đăng nhập (idx là vị trí trong vector `users`)
-void changePassword(int idx) {
-     string currentPwd;
+void changePassword(int idx)
+{
+    string currentPwd;
     cout << "Nhap mat khau hien tai: ";
     getline(cin, currentPwd);
-    string currentHash = sha256(currentPwd);;
+    string currentHash = sha256(currentPwd);
+    ;
     if (currentHash != users[idx].passwordHash)
     {
         cout << "Mat khau hien tai khong chinh xac.\n";
@@ -354,7 +367,7 @@ void changePassword(int idx) {
         cout << "Mat khau xac nhan khong khop.\n";
         return;
     }
-    if (sha256(newPwd)  == users[idx].passwordHash)
+    if (sha256(newPwd) == users[idx].passwordHash)
     {
         cout << "Mat khau moi trung voi mat khau cu. Hay chon mat khau khac.\n";
         return;
@@ -367,7 +380,8 @@ void changePassword(int idx) {
 }
 
 // Cập nhật thông tin cá nhân (họ tên, email) của người dùng, có xác thực OTP
-void updatePersonalInfo(int idx) {
+void updatePersonalInfo(int idx)
+{
     cout << "Ten hien tai: " << users[idx].fullname << ". Nhap ten moi (Enter de giu nguyen): ";
     string newName;
     string input;
@@ -404,16 +418,19 @@ void updatePersonalInfo(int idx) {
 
 // Thực hiện chuyển điểm từ tài khoản người dùng hiện tại (fromIdx) đến tài khoản đích (toUsername).
 // Có xác thực OTP và đảm bảo tính nguyên tử của giao dịch.
-void transferPoints(int fromIdx) {
+void transferPoints(int fromIdx)
+{
     string toUsername;
     cout << "Nhập tên tài khoản người nhận: ";
     getline(cin, toUsername);
     int toIdx = findUserIndex(toUsername);
-    if (toIdx == -1) {
+    if (toIdx == -1)
+    {
         cout << "Tài khoản người nhận không tồn tại.\n";
         return;
     }
-    if (toIdx == fromIdx) {
+    if (toIdx == fromIdx)
+    {
         cout << "Bạn không thể chuyển điểm cho chính mình.\n";
         return;
     }
@@ -421,47 +438,57 @@ void transferPoints(int fromIdx) {
     cout << "Nhập số điểm cần chuyển: ";
     getline(cin, amountStr);
     long long amount = 0;
-    try {
+    try
+    {
         amount = stoll(amountStr);
-    } catch (...) {
+    }
+    catch (...)
+    {
         amount = 0;
     }
-    if (amount <= 0) {
+    if (amount <= 0)
+    {
         cout << "Số điểm phải là số dương lớn hơn 0.\n";
         return;
     }
-    if (users[fromIdx].balance < amount) {
+    if (users[fromIdx].balance < amount)
+    {
         cout << "Số dư không đủ để thực hiện giao dịch.\n";
         return;
     }
     // Yêu cầu OTP xác nhận giao dịch chuyển điểm
-    if (!verifyOTP(users[fromIdx].email)) {
+    if (!verifyOTP(users[fromIdx].email))
+    {
         return;
     }
     // Thực hiện giao dịch chuyển điểm (đảm bảo nguyên tử)
     long long &senderBal = users[fromIdx].balance;
-    long long &recvBal   = users[toIdx].balance;
+    long long &recvBal = users[toIdx].balance;
     // Lưu lại số dư ban đầu để có thể khôi phục nếu cần (trường hợp giao dịch lỗi)
     long long oldSenderBal = senderBal;
-    long long oldRecvBal   = recvBal;
+    long long oldRecvBal = recvBal;
     // 1. Trừ điểm từ ví người gửi
     senderBal -= amount;
     // 2. Cộng điểm vào ví người nhận
-    recvBal   += amount;
+    recvBal += amount;
     // 3. Lưu thay đổi xuống tệp dữ liệu người dùng (giả định không lỗi)
-    if (!ofstream(USERS_FILE)) {
+    if (!ofstream(USERS_FILE))
+    {
         // Nếu mở tệp không thành công (lỗi ghi file), khôi phục số dư cũ và hủy giao dịch
         senderBal = oldSenderBal;
-        recvBal   = oldRecvBal;
+        recvBal = oldRecvBal;
         cerr << "Lỗi hệ thống: không thể ghi dữ liệu. Giao dịch bị hủy.\n";
         return;
     }
     saveUsersToFile();
     // 4. Ghi lịch sử giao dịch vào tệp log
     ofstream fout(LOG_FILE, ios::app);
-    if (!fout) {
+    if (!fout)
+    {
         cerr << "Không thể ghi lịch sử giao dịch (nhưng giao dịch đã hoàn tất).\n";
-    } else {
+    }
+    else
+    {
         // Lấy thời gian hiện tại (timestamp)
         auto now = chrono::system_clock::now();
         time_t t = chrono::system_clock::to_time_t(now);
@@ -540,16 +567,19 @@ void adminCreateUser()
 
 // Thực hiện chuyển điểm từ tài khoản người dùng hiện tại (fromIdx) đến tài khoản đích (toUsername).
 // Có xác thực OTP và đảm bảo tính nguyên tử của giao dịch.
-void transferPoints(int fromIdx) {
+void transferPoints(int fromIdx)
+{
     string toUsername;
     cout << "Nhập tên tài khoản người nhận: ";
     getline(cin, toUsername);
     int toIdx = findUserIndex(toUsername);
-    if (toIdx == -1) {
+    if (toIdx == -1)
+    {
         cout << "Tài khoản người nhận không tồn tại.\n";
         return;
     }
-    if (toIdx == fromIdx) {
+    if (toIdx == fromIdx)
+    {
         cout << "Bạn không thể chuyển điểm cho chính mình.\n";
         return;
     }
@@ -557,47 +587,57 @@ void transferPoints(int fromIdx) {
     cout << "Nhập số điểm cần chuyển: ";
     getline(cin, amountStr);
     long long amount = 0;
-    try {
+    try
+    {
         amount = stoll(amountStr);
-    } catch (...) {
+    }
+    catch (...)
+    {
         amount = 0;
     }
-    if (amount <= 0) {
+    if (amount <= 0)
+    {
         cout << "Số điểm phải là số dương lớn hơn 0.\n";
         return;
     }
-    if (users[fromIdx].balance < amount) {
+    if (users[fromIdx].balance < amount)
+    {
         cout << "Số dư không đủ để thực hiện giao dịch.\n";
         return;
     }
     // Yêu cầu OTP xác nhận giao dịch chuyển điểm
-    if (!verifyOTP(users[fromIdx].email)) {
+    if (!verifyOTP(users[fromIdx].email))
+    {
         return;
     }
     // Thực hiện giao dịch chuyển điểm (đảm bảo nguyên tử)
     long long &senderBal = users[fromIdx].balance;
-    long long &recvBal   = users[toIdx].balance;
+    long long &recvBal = users[toIdx].balance;
     // Lưu lại số dư ban đầu để có thể khôi phục nếu cần (trường hợp giao dịch lỗi)
     long long oldSenderBal = senderBal;
-    long long oldRecvBal   = recvBal;
+    long long oldRecvBal = recvBal;
     // 1. Trừ điểm từ ví người gửi
     senderBal -= amount;
     // 2. Cộng điểm vào ví người nhận
-    recvBal   += amount;
+    recvBal += amount;
     // 3. Lưu thay đổi xuống tệp dữ liệu người dùng (giả định không lỗi)
-    if (!ofstream(USERS_FILE)) {
+    if (!ofstream(USERS_FILE))
+    {
         // Nếu mở tệp không thành công (lỗi ghi file), khôi phục số dư cũ và hủy giao dịch
         senderBal = oldSenderBal;
-        recvBal   = oldRecvBal;
+        recvBal = oldRecvBal;
         cerr << "Lỗi hệ thống: không thể ghi dữ liệu. Giao dịch bị hủy.\n";
         return;
     }
     saveUsersToFile();
     // 4. Ghi lịch sử giao dịch vào tệp log
     ofstream fout(LOG_FILE, ios::app);
-    if (!fout) {
+    if (!fout)
+    {
         cerr << "Không thể ghi lịch sử giao dịch (nhưng giao dịch đã hoàn tất).\n";
-    } else {
+    }
+    else
+    {
         // Lấy thời gian hiện tại (timestamp)
         auto now = chrono::system_clock::now();
         time_t t = chrono::system_clock::to_time_t(now);
@@ -613,24 +653,29 @@ void transferPoints(int fromIdx) {
 }
 
 // Xem toàn bộ lịch sử giao dịch (dành cho quản trị viên)
-void viewTransactionLog() {
+void viewTransactionLog()
+{
     ifstream fin(LOG_FILE);
-    if (!fin) {
+    if (!fin)
+    {
         cout << "Không có lịch sử giao dịch nào.\n";
         return;
     }
     cout << "===== LỊCH SỬ GIAO DỊCH HỆ THỐNG =====\n";
     string line;
-    while (getline(fin, line)) {
+    while (getline(fin, line))
+    {
         cout << line << endl;
     }
     fin.close();
 }
 
 // Xem lịch sử giao dịch của chính người dùng hiện tại (chỉ liệt kê các giao dịch mà user này gửi hoặc nhận)
-void viewMyTransactions(int idx) {
+void viewMyTransactions(int idx)
+{
     ifstream fin(LOG_FILE);
-    if (!fin) {
+    if (!fin)
+    {
         cout << "Không có lịch sử giao dịch.\n";
         return;
     }
@@ -638,7 +683,8 @@ void viewMyTransactions(int idx) {
     string line;
     string uname = users[idx].username;
     // Duyệt từng dòng trong log, kiểm tra sự xuất hiện của username (ở cột người gửi hoặc người nhận)
-    while (getline(fin, line)) {
+    while (getline(fin, line))
+    {
         // Mỗi dòng format: TIMESTAMP, FROM_USER, TO_USER, AMOUNT
         // Sử dụng stringstream để tách các phần
         string ts, fromUser, toUser;
@@ -650,21 +696,28 @@ void viewMyTransactions(int idx) {
         string amountStr;
         getline(ss, amountStr, ',');
         // Loại bỏ khoảng trắng thừa xung quanh các phần tử đã tách
-        auto trim = [](string &s) {
-            while (!s.empty() && isspace(s.back())) s.pop_back();
-            while (!s.empty() && isspace(s.front())) s.erase(0, 1);
+        auto trim = [](string &s)
+        {
+            while (!s.empty() && isspace(s.back()))
+                s.pop_back();
+            while (!s.empty() && isspace(s.front()))
+                s.erase(0, 1);
         };
         trim(ts);
         trim(fromUser);
         trim(toUser);
         trim(amountStr);
-        try {
+        try
+        {
             amount = stoll(amountStr);
-        } catch (...) {
+        }
+        catch (...)
+        {
             amount = 0;
         }
         // Kiểm tra nếu user hiện tại là người gửi hoặc người nhận
-        if (fromUser == uname || toUser == uname) {
+        if (fromUser == uname || toUser == uname)
+        {
             // Xác định vai trò của user trong giao dịch (gửi hoặc nhận)
             string action = (fromUser == uname) ? "đã gửi" : "đã nhận";
             string otherUser = (fromUser == uname) ? toUser : fromUser;
@@ -676,7 +729,8 @@ void viewMyTransactions(int idx) {
 }
 
 // Xem thông tin tài khoản cá nhân của người dùng (username, họ tên, email, số dư, vai trò)
-void viewPersonalInfo(int idx) {
+void viewPersonalInfo(int idx)
+{
     cout << "===== THÔNG TIN TÀI KHOẢN =====\n";
     cout << "Tên đăng nhập:  " << users[idx].username << endl;
     cout << "Họ và tên:      " << users[idx].fullname << endl;
@@ -706,59 +760,74 @@ void listAllUsers()
 }
 
 // -------------------- HÀM MAIN (CHƯƠNG TRÌNH CHÍNH) --------------------
-int main() {
+int main()
+{
     // Tải dữ liệu người dùng từ tệp vào vector `users`
     int userCount = loadUsersFromFile();
-    if (userCount == 0) {
+    if (userCount == 0)
+    {
         // Nếu hệ thống chưa có người dùng nào, tự động tạo tài khoản quản trị mặc định
         User admin;
         admin.username = "admin";
         admin.fullname = "Administrator";
-        admin.email = "";  // chưa có email
+        admin.email = ""; // chưa có email
         string defaultPass = "admin";
         admin.passwordHash = sha256(defaultPass);
-        admin.balance = 1000;       // khởi tạo ví admin với 1000 điểm để thử giao dịch
+        admin.balance = 1000; // khởi tạo ví admin với 1000 điểm để thử giao dịch
         admin.isAdmin = true;
-        admin.needChangePassword = true;  // yêu cầu đổi mật khẩu do dùng mật khẩu mặc định
+        admin.needChangePassword = true; // yêu cầu đổi mật khẩu do dùng mật khẩu mặc định
         users.push_back(admin);
         saveUsersToFile();
         cout << "Đã tạo tài khoản quản trị mặc định (username: admin, password: admin). Vui lòng đăng nhập và đổi mật khẩu.\n";
     }
     // Vòng lặp vô hạn cho menu đăng nhập/đăng ký
-    while (true) {
+    while (true)
+    {
         cout << "\n=== MENU ===\n";
         cout << "1. Đăng nhập\n";
         cout << "2. Đăng ký\n";
         cout << "0. Thoát\n";
         cout << "Lựa chọn: ";
         string choice;
-        if (!getline(cin, choice)) {
+        if (!getline(cin, choice))
+        {
             // Trường hợp ngắt input (EOF)
             break;
         }
-        if (choice == "1") {
+        if (choice == "1")
+        {
             // Xử lý đăng nhập
             int userIdx = loginUser();
-            if (userIdx >= 0) {
+            if (userIdx >= 0)
+            {
                 // Đăng nhập thành công
                 // Nếu tài khoản đang dùng mật khẩu tạm (tự sinh hoặc do admin đặt), bắt buộc đổi mật khẩu mới
-                if (users[userIdx].needChangePassword) {
+                if (users[userIdx].needChangePassword)
+                {
                     cout << "\nBạn đang sử dụng mật khẩu tạm thời. Vui lòng đổi mật khẩu mới.\n";
                     string newPwd, confirmPwd;
                     // Bắt người dùng đổi mật khẩu đến khi hợp lệ
-                    do {
+                    do
+                    {
                         cout << "Mật khẩu mới: ";
                         getline(cin, newPwd);
                         cout << "Xác nhận mật khẩu mới: ";
                         getline(cin, confirmPwd);
-                        if (newPwd.empty()) {
+                        if (newPwd.empty())
+                        {
                             cout << "Mật khẩu mới không được để trống.\n";
-                        } else if (newPwd != confirmPwd) {
+                        }
+                        else if (newPwd != confirmPwd)
+                        {
                             cout << "Mật khẩu xác nhận không khớp.\n";
-                        } else if (sha256(newPwd) == users[userIdx].passwordHash) {
+                        }
+                        else if (sha256(newPwd) == users[userIdx].passwordHash)
+                        {
                             // Không cho phép trùng với mật khẩu cũ (tạm thời)
                             cout << "Mật khẩu mới trùng với mật khẩu tạm thời. Vui lòng chọn mật khẩu khác.\n";
-                        } else {
+                        }
+                        else
+                        {
                             // Mật khẩu hợp lệ và khác mật khẩu cũ
                             break;
                         }
@@ -770,9 +839,11 @@ int main() {
                     cout << "Đổi mật khẩu thành công. Bạn đã có thể sử dụng hệ thống.\n";
                 }
                 // Phân chia menu theo loại người dùng (admin hoặc thường)
-                if (users[userIdx].isAdmin) {
+                if (users[userIdx].isAdmin)
+                {
                     // Menu dành cho quản trị viên
-                    while (true) {
+                    while (true)
+                    {
                         cout << "\n--- MENU QUẢN TRỊ VIÊN ---\n";
                         cout << "1. Xem thông tin cá nhân\n";
                         cout << "2. Đổi mật khẩu\n";
@@ -784,33 +855,54 @@ int main() {
                         cout << "0. Đăng xuất\n";
                         cout << "Lựa chọn: ";
                         string adminChoice;
-                        if (!getline(cin, adminChoice)) {
-                            return 0;  // kết thúc chương trình nếu không nhận được input
+                        if (!getline(cin, adminChoice))
+                        {
+                            return 0; // kết thúc chương trình nếu không nhận được input
                         }
-                        if (adminChoice == "1") {
+                        if (adminChoice == "1")
+                        {
                             viewPersonalInfo(userIdx);
-                        } else if (adminChoice == "2") {
+                        }
+                        else if (adminChoice == "2")
+                        {
                             changePassword(userIdx);
-                        } else if (adminChoice == "3") {
+                        }
+                        else if (adminChoice == "3")
+                        {
                             updatePersonalInfo(userIdx);
-                        } else if (adminChoice == "4") {
+                        }
+                        else if (adminChoice == "4")
+                        {
                             transferPoints(userIdx);
-                        } else if (adminChoice == "5") {
+                        }
+                        else if (adminChoice == "5")
+                        {
                             listAllUsers();
-                        } else if (adminChoice == "6") {
+                        }
+                        else if (adminChoice == "6")
+                        {
                             adminCreateUser();
-                        } else if (adminChoice == "7") {
+                        }
+                        else if (adminChoice == "7")
+                        {
                             viewTransactionLog();
-                        } else if (adminChoice == "0") {
+                        }
+                        else if (adminChoice == "0")
+                        {
                             cout << "Đăng xuất khỏi tài khoản quản trị viên.\n";
                             break;
-                        } else {
+                        }
+                        else
+                        {
                             cout << "Lựa chọn không hợp lệ. Vui lòng thử lại.\n";
                         }
                     }
-                } else {
+                }
+                else
+                {
                     // Menu dành cho người dùng thường
-                    while (true) {
+                    while (true)
+                    {
                         cout << "\n--- MENU NGƯỜI DÙNG ---\n";
                         cout << "1. Xem thông tin cá nhân\n";
                         cout << "2. Đổi mật khẩu\n";
@@ -820,39 +912,61 @@ int main() {
                         cout << "0. Đăng xuất\n";
                         cout << "Lựa chọn: ";
                         string userChoice;
-                        if (!getline(cin, userChoice)) {
+                        if (!getline(cin, userChoice))
+                        {
                             return 0;
                         }
-                        if (userChoice == "1") {
+                        if (userChoice == "1")
+                        {
                             viewPersonalInfo(userIdx);
-                        } else if (userChoice == "2") {
+                        }
+                        else if (userChoice == "2")
+                        {
                             changePassword(userIdx);
-                        } else if (userChoice == "3") {
+                        }
+                        else if (userChoice == "3")
+                        {
                             updatePersonalInfo(userIdx);
-                        } else if (userChoice == "4") {
+                        }
+                        else if (userChoice == "4")
+                        {
                             transferPoints(userIdx);
-                        } else if (userChoice == "5") {
+                        }
+                        else if (userChoice == "5")
+                        {
                             viewMyTransactions(userIdx);
-                        } else if (userChoice == "0") {
+                        }
+                        else if (userChoice == "0")
+                        {
                             cout << "Đăng xuất khỏi tài khoản người dùng.\n";
                             break;
-                        } else {
+                        }
+                        else
+                        {
                             cout << "Lựa chọn không hợp lệ. Vui lòng chọn lại.\n";
                         }
                     }
                 }
             }
             // Nếu đăng nhập thất bại, vòng lặp menu chính sẽ tiếp tục (cho phép chọn lại)
-        } else if (choice == "2") {
+        }
+        else if (choice == "2")
+        {
             // Xử lý đăng ký người dùng mới
             registerUser();
-        } else if (choice == "0") {
+        }
+        else if (choice == "0")
+        {
             cout << "Thoát chương trình. Tạm biệt!\n";
             break;
-        } else {
+        }
+        else
+        {
             cout << "Lựa chọn không hợp lệ. Vui lòng thử lại.\n";
         }
     }
 
     return 0;
 }
+// Kết thúc chương trình
+// -------------------- KẾT THÚC --------------------
