@@ -197,6 +197,12 @@ void viewMyTransactions(int idx) {
 
 // Xem thông tin tài khoản cá nhân của người dùng (username, họ tên, email, số dư, vai trò)
 void viewPersonalInfo(int idx) {
+    cout << "===== THÔNG TIN TÀI KHOẢN =====\n";
+    cout << "Tên đăng nhập:  " << users[idx].username << endl;
+    cout << "Họ và tên:      " << users[idx].fullname << endl;
+    cout << "Email:          " << users[idx].email << endl;
+    cout << "Số dư (điểm):   " << users[idx].balance << endl;
+    cout << "Loại tài khoản: " << (users[idx].isAdmin ? "Quản trị viên" : "Người dùng thường") << endl;
 }
 
 // Liệt kê danh sách tất cả người dùng trong hệ thống (dành cho quản trị viên)
