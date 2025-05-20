@@ -219,6 +219,38 @@ void changePassword(int idx) {
 
 // Cập nhật thông tin cá nhân (họ tên, email) của người dùng, có xác thực OTP
 void updatePersonalInfo(int idx) {
+    cout << "Ten hien tai: " << users[idx].fullname << ". Nhap ten moi (Enter de giu nguyen): ";
+    string newName;
+    string input;
+    getline(cin, input);
+    if (!input.empty())
+        newName = input;
+    else
+        newName = users[idx].fullname;
+    cout << "Email hien tai: " << users[idx].email << ". Nhap email moi (Enter de giu nguyen): ";
+    string newEmail;
+    input.clear();
+    getline(cin, input);
+    if (!input.empty())
+        newEmail = input;
+    else
+        newEmail = users[idx].email;
+    if (newName == users[idx].fullname && newEmail == users[idx].email)
+    {
+        cout << "Khong co thay doi thong tin.\n";
+        return;
+    }
+    // Yêu cầu xác thực OTP trước khi thay đổi thông tin quan trọng
+    if (!verifyOTP(users[idx].email))
+    {
+        // Nếu OTP sai, hủy thao tác
+        return;
+    }
+    // Cập nhật thông tin nếu OTP đúng
+    users[idx].fullname = newName;
+    users[idx].email = newEmail;
+    saveUsersToFile();
+    cout << "Cap nhat thong tin ca nhan thanh cong.\n";
 }
 
 // Xem toàn bộ lịch sử giao dịch (dành cho quản trị viên)
