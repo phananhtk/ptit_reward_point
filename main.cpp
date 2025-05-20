@@ -108,6 +108,50 @@ void viewTransactionLog() {
 
 // Xem lịch sử giao dịch của chính người dùng hiện tại (chỉ liệt kê các giao dịch mà user này gửi hoặc nhận)
 void viewMyTransactions(int idx) {
+      ifstream fin(LOG_FILE);
+    if (!fin) {
+        cout << "Không có lịch sử giao dịch.\n";
+        return;
+    }
+    cout << "===== LỊCH SỬ GIAO DỊCH CỦA BẠN =====\n";
+    string line;
+    string uname = users[idx].username;
+    // Duyệt từng dòng trong log, kiểm tra sự xuất hiện của username (ở cột người gửi hoặc người nhận)
+    while (getline(fin, line)) {
+        // Mỗi dòng format: TIMESTAMP, FROM_USER, TO_USER, AMOUNT
+        // Sử dụng stringstream để tách các phần
+        string ts, fromUser, toUser;
+        long long amount;
+        stringstream ss(line);
+        getline(ss, ts, ',');
+        getline(ss, fromUser, ',');
+        getline(ss, toUser, ',');
+        string amountStr;
+        getline(ss, amountStr, ',');
+        // Loại bỏ khoảng trắng thừa xung quanh các phần tử đã tách
+        auto trim = [](string &s) {
+            while (!s.empty() && isspace(s.back())) s.pop_back();
+            while (!s.empty() && isspace(s.front())) s.erase(0, 1);
+        };
+        trim(ts);
+        trim(fromUser);
+        trim(toUser);
+        trim(amountStr);
+        try {
+            amount = stoll(amountStr);
+        } catch (...) {
+            amount = 0;
+        }
+        // Kiểm tra nếu user hiện tại là người gửi hoặc người nhận
+        if (fromUser == uname || toUser == uname) {
+            // Xác định vai trò của user trong giao dịch (gửi hoặc nhận)
+            string action = (fromUser == uname) ? "đã gửi" : "đã nhận";
+            string otherUser = (fromUser == uname) ? toUser : fromUser;
+            string direction = (fromUser == uname) ? "đến" : "từ";
+            cout << ts << ": " << action << " " << amount << " điểm " << direction << " tài khoản " << otherUser << ".\n";
+        }
+    }
+    fin.close();
 }
 
 // Xem thông tin tài khoản cá nhân của người dùng (username, họ tên, email, số dư, vai trò)
