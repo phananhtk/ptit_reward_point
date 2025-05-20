@@ -14,6 +14,7 @@
 #include <curl/curl.h>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
+#include <ctime>
 
 using namespace std;
 
@@ -625,6 +626,7 @@ void listAllUsers()
 
 // -------------------- HÀM MAIN (CHƯƠNG TRÌNH CHÍNH) --------------------
 int main() {
+    srand(time(0)); // Seed để tạo số ngẫu nhiên mới mỗi lần chạy
     // Tải dữ liệu người dùng từ tệp vào vector `users`
     int userCount = loadUsersFromFile();
     if (userCount == 0) {
