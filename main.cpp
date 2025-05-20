@@ -21,6 +21,10 @@ struct User {
     bool needChangePassword; // Đánh dấu cần đổi mật khẩu (nếu dùng mật khẩu tự động hoặc do admin đặt)
 };
 
+// Danh sách người dùng (tải từ tệp khi khởi động chương trình)
+vector<User> users;
+const string USERS_FILE = "users.txt";          // Tệp lưu thông tin tài khoản người dùng
+
 // (Dành cho quản trị viên) Tạo tài khoản người dùng mới (có thể là user thường hoặc admin khác)
 void adminCreateUser() {
     cout << "Tạo tài khoản mới thành công.\n";
@@ -29,7 +33,23 @@ void adminCreateUser() {
 // Xử lý đăng nhập: kiểm tra tên đăng nhập và mật khẩu có khớp trong hệ thống không.
 // Trả về chỉ số người dùng (index trong vector `users`) nếu đăng nhập thành công, hoặc -1 nếu thất bại.
 int loginUser() {
-    return -1;
+    string username;
+    cout << "Tên đăng nhập: ";
+    getline(cin, username);
+    string password;
+    cout << "Mật khẩu: ";
+    getline(cin, password);
+    int idx = findUserIndex(username);
+    if (idx == -1) {
+        cout << "Tên đăng nhập không tồn tại.\n";
+        return -1;
+    }
+    string hashInput = password;
+    if (hashInput != users[idx].passwordHash) {
+        cout << "Mật khẩu không đúng.\n";
+        return -1;
+    }
+    return idx;
 }
 
 // Gửi mã OTP đến email người dùng và yêu cầu họ nhập mã để xác nhận.
@@ -52,6 +72,11 @@ int loadUsersFromFile() {
 // Tìm vị trí (index) của người dùng trong vector `users` dựa trên `username`.
 // Trả về -1 nếu không tìm thấy.
 int findUserIndex(const string &username) {
+    for (size_t i = 0; i < users.size(); ++i) {
+        if (users[i].username == username) {
+            return (int)i;
+        }
+    }
     return -1;
 }
 
