@@ -3,6 +3,8 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <vector>
+#include <chrono>
 
 using namespace std;
 
@@ -60,7 +62,22 @@ bool verifyOTP(const string &email) {
 // Hàm lưu toàn bộ danh sách người dùng ra tệp USERS_FILE.
 // Mỗi người dùng là một dòng với các trường cách nhau bởi dấu ';'.
 void saveUsersToFile() {
-    return;
+    ofstream fout(USERS_FILE);
+    if (!fout) {
+        cerr << "Lỗi: Không thể ghi tệp dữ liệu người dùng.\n";
+        return;
+    }
+    for (const auto &u : users) {
+        fout << u.username << ";"
+             << (u.isAdmin ? "admin" : "user") << ";"    // lưu vai trò
+             << u.passwordHash << ";"
+             << u.balance << ";"
+             << u.fullname << ";"
+             << u.email << ";"
+             << (u.needChangePassword ? "1" : "0")       // 1 nếu cần đổi mật khẩu, 0 nếu không
+             << "\n";
+    }
+    fout.close();
 }
 
 // Hàm tải dữ liệu người dùng từ tệp USERS_FILE vào vector `users`.
