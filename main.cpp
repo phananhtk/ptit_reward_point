@@ -19,7 +19,8 @@ size_t payload_source(void* ptr, size_t size, size_t nmemb, void* userp) {
     return len;
 }
 
-bool sendEmailOTP() {
+bool sendEmailOTP(const string &toEmail, const string &subject, const string &body) 
+{
     CURL* curl;
     CURLcode res = CURLE_OK;
     curl = curl_easy_init();
@@ -170,14 +171,11 @@ void registerUser() {
 }
 
 // (Dành cho quản trị viên) Tạo tài khoản người dùng mới (có thể là user thường hoặc admin khác)
-void adminCreateUser() {
-}
+//void adminCreateUser() {}
 
 // Xử lý đăng nhập: kiểm tra tên đăng nhập và mật khẩu băm có khớp trong hệ thống không.
 // Trả về chỉ số người dùng (index trong vector `users`) nếu đăng nhập thành công, hoặc -1 nếu thất bại.
-int loginUser() {
-    return -1;
-}
+
 
 // Đổi mật khẩu cho người dùng đã đăng nhập (idx là vị trí trong vector `users`)
 void changePassword(int idx) {
