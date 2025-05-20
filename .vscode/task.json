@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "CMake Configure",
+      "type": "shell",
+      "command": "C:/Program Files/CMake/bin/cmake.exe",
+      "args": [
+        "-B",
+        "build",
+        "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "-G",
+        "MinGW Makefiles"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "detail": "Configure CMake project with vcpkg"
+    },
+    {
+      "label": "CMake Build", 
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "detail": "Build CMake project"
+    }
+  ]
+}
