@@ -11,9 +11,9 @@
         "-Wall",
         "-Wextra",
         "-g",
-        "D:/ptit/C++ PTIT/ptit_reward_point/main.cpp",
+        "${workspaceFolder}/main.cpp",
         "-o",
-        "D:/ptit/C++ PTIT/ptit_reward_point/output/main.exe",
+        "${workspaceFolder}/output/main.exe",
         "-I", "C:/msys64/mingw64/include",
         "-L", "C:/msys64/mingw64/lib",
         "-lssl",
@@ -21,7 +21,7 @@
         "-lcurl"
       ],
       "options": {
-        "cwd": "D:/ptit/C++ PTIT/ptit_reward_point"
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": ["$gcc"],
       "group": {
