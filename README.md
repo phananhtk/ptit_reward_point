@@ -17,12 +17,12 @@ WalletSystem là một ứng dụng dòng lệnh để quản lý tài khoản n
    - Xử lý đăng nhập (`loginUser`), tạo tài khoản quản trị mặc định.
    - Gửi OTP qua email với thư viện cURL (`sendEmailOTP`, `verifyOTP`).
    - Cài đặt thư viện liên quan.
-2. **Trần Tiến Dũng -K24DTCN182 - trantiendung740@gmail.com**:
+2. **Trần Tiến Dũng - K24DTCN182 - trantiendung740@gmail.com**:
    - Đăng ký người dùng (`registerUser`).
    - Quản trị viên tạo tài khoản mới (`adminCreateUser`).
    - Tải dữ liệu từ tệp `users.txt` (`loadUsersFromFile`), tìm người dùng (`findUserIndex`).
    - Liệt kê danh sách người dùng (`listAllUsers`).
-3. **Nguyễn Văn Tùng -K24DTCN246-caubuonviem1280@gmail.com**:
+3. **Nguyễn Văn Tùng -K24DTCN246 - caubuonviem1280@gmail.com**:
    - Xem thông tin tài khoản cá nhân (`viewPersonalInfo`).
    - Đổi mật khẩu (`changePassword`).
    - Cập nhật thông tin cá nhân (`updatePersonalInfo`).
