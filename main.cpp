@@ -1,4 +1,5 @@
 #include <iostream>
+#include <windows.h>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
@@ -8,7 +9,6 @@
 #include <chrono>
 #include <cstdlib>
 #include <cctype>
-#include <curl/curl.h>
 #include <vector>
 #include <chrono>
 #include <curl/curl.h>
@@ -18,24 +18,29 @@
 using namespace std;
 
 // Hàm băm SHA-256 để lưu mật khẩu an toàn vào hệ thống.
-string sha256(const string& str) {
+string sha256(const string &str)
+{
     unsigned char hash[EVP_MAX_MD_SIZE];
     unsigned int hash_len;
 
-    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
-    if (!ctx) return "";
+    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+    if (!ctx)
+        return "";
 
-    if (1 != EVP_DigestInit_ex(ctx, EVP_sha256(), NULL)) {
+    if (1 != EVP_DigestInit_ex(ctx, EVP_sha256(), NULL))
+    {
         EVP_MD_CTX_free(ctx);
         return "";
     }
 
-    if (1 != EVP_DigestUpdate(ctx, str.c_str(), str.size())) {
+    if (1 != EVP_DigestUpdate(ctx, str.c_str(), str.size()))
+    {
         EVP_MD_CTX_free(ctx);
         return "";
     }
 
-    if (1 != EVP_DigestFinal_ex(ctx, hash, &hash_len)) {
+    if (1 != EVP_DigestFinal_ex(ctx, hash, &hash_len))
+    {
         EVP_MD_CTX_free(ctx);
         return "";
     }
@@ -43,28 +48,32 @@ string sha256(const string& str) {
     EVP_MD_CTX_free(ctx);
 
     stringstream ss;
-    for (unsigned int i = 0; i < hash_len; ++i) {
+    for (unsigned int i = 0; i < hash_len; ++i)
+    {
         ss << hex << setw(2) << setfill('0') << (int)hash[i];
     }
     return ss.str();
 }
 // Tao payload de send SMTP mail
-size_t payload_source(void* ptr, [[maybe_unused]] size_t size, [[maybe_unused]] size_t nmemb, void* userp)
+size_t payload_source(void *ptr, [[maybe_unused]] size_t size, [[maybe_unused]] size_t nmemb, void *userp)
 {
-    const char** payload = (const char**)userp;
+    const char **payload = (const char **)userp;
     size_t len = strlen(*payload);
-    if (len == 0) return 0;
+    if (len == 0)
+        return 0;
     memcpy(ptr, *payload, len);
     *payload += len;
     return len;
 }
 
-bool sendEmailOTP(const string& toEmail, const string& subject, const string& body) {
-    CURL* curl;
+bool sendEmailOTP(const string &toEmail, const string &subject, const string &body)
+{
+    CURL *curl;
     CURLcode res = CURLE_OK;
     curl = curl_easy_init();
 
-    if (!curl) return false;
+    if (!curl)
+        return false;
 
     // Replace with your Gmail and App Password
     const string fromEmail = "phananh1304@gmail.com";
@@ -76,7 +85,7 @@ bool sendEmailOTP(const string& toEmail, const string& subject, const string& bo
         "Subject: " + subject + "\r\n" +
         "\r\n" + body + "\r\n";
 
-    const char* payload = fullPayload.c_str();
+    const char *payload = fullPayload.c_str();
 
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://smtp.gmail.com:587");
     curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
@@ -84,7 +93,7 @@ bool sendEmailOTP(const string& toEmail, const string& subject, const string& bo
     curl_easy_setopt(curl, CURLOPT_PASSWORD, appPassword.c_str());
     curl_easy_setopt(curl, CURLOPT_MAIL_FROM, ("<" + fromEmail + ">").c_str());
 
-    struct curl_slist* recipients = NULL;
+    struct curl_slist *recipients = NULL;
     recipients = curl_slist_append(recipients, ("<" + toEmail + ">").c_str());
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
@@ -97,14 +106,14 @@ bool sendEmailOTP(const string& toEmail, const string& subject, const string& bo
     curl_slist_free_all(recipients);
     curl_easy_cleanup(curl);
 
-    if (res != CURLE_OK) {
+    if (res != CURLE_OK)
+    {
         cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << endl;
         return false;
     }
 
     return true;
 }
-
 
 // Cấu trúc lưu thông tin một người dùng trong hệ thống
 struct User
@@ -124,9 +133,12 @@ const string LOG_FILE = "transactions.txt"; // Tệp lưu lịch sử giao dịc
 
 // Tìm vị trí (index) của người dùng trong vector `users` dựa trên `username`.
 // Trả về -1 nếu không tìm thấy.
-int findUserIndex(const string &username) {
-    for (size_t i = 0; i < users.size(); ++i) {
-        if (users[i].username == username) {
+int findUserIndex(const string &username)
+{
+    for (size_t i = 0; i < users.size(); ++i)
+    {
+        if (users[i].username == username)
+        {
             return (int)i;
         }
     }
@@ -135,20 +147,23 @@ int findUserIndex(const string &username) {
 
 // Xử lý đăng nhập: kiểm tra tên đăng nhập và mật khẩu có khớp trong hệ thống không.
 // Trả về chỉ số người dùng (index trong vector `users`) nếu đăng nhập thành công, hoặc -1 nếu thất bại.
-int loginUser() {
+int loginUser()
+{
     string username;
-    cout << "Tên đăng nhập: ";
+    cout << "Tên Đăng Nhập: ";
     getline(cin, username);
     string password;
-    cout << "Mật khẩu: ";
+    cout << "Mật Khẩu: ";
     getline(cin, password);
     int idx = findUserIndex(username);
-    if (idx == -1) {
-        cout << "Tên đăng nhập không tồn tại.\n";
+    if (idx == -1)
+    {
+        cout << "Ten đăng nhập không tồn tại.\n";
         return -1;
     }
     string hashInput = sha256(password);
-    if (hashInput != users[idx].passwordHash) {
+    if (hashInput != users[idx].passwordHash)
+    {
         cout << "Mật khẩu không đúng.\n";
         return -1;
     }
@@ -157,19 +172,24 @@ int loginUser() {
 
 // Gửi mã OTP đến email người dùng và yêu cầu họ nhập mã để xác nhận.
 
-bool verifyOTP(const string &email) {
+bool verifyOTP(const string &email)
+{
     // Sinh ngẫu nhiên một mã OTP 6 chữ số
     int otpCode = 100000 + rand() % 900000;
-    // Thông báo gửi OTP
+    // Thông báo (giả lập) gửi OTP
     sendEmailOTP(email, "Mã OTP", std::to_string(otpCode));
     cout << "Mã OTP đã được gửi đến email của bạn";
-    if (!email.empty()) {
+    if (!email.empty())
+    {
         cout << " (" << email << ")";
     }
+    // In ra mã OTP (trong thực tế sẽ gửi qua email, SMS; ở đây in ra để người dùng nhập)
+    // cout << "Mã OTP: " << otpCode << endl;
     cout << "Nhập mã OTP để xác nhận: ";
     string input;
     getline(cin, input);
-    if (input != to_string(otpCode)) {
+    if (input != to_string(otpCode))
+    {
         cout << "Mã OTP không đúng. Hủy thao tác.\n";
         return false;
     }
@@ -271,7 +291,7 @@ void registerUser()
     getline(cin, username);
     if (username.empty())
     {
-        cout << "Tên đăng nhập không được bỏ trống.\n";
+       cout << "Tên đăng nhập không được bỏ trống.\n";
         return;
     }
     if (findUserIndex(username) != -1)
@@ -280,7 +300,7 @@ void registerUser()
         return;
     }
     string fullname;
-    cout << "Tên người dùng: ";
+    cout << "Ten nguoi dung: ";
     getline(cin, fullname);
     string email;
     cout << "Email: ";
@@ -317,50 +337,53 @@ void registerUser()
     newUser.needChangePassword = autoPass; // nếu mật khẩu tự sinh thì đánh dấu yêu cầu đổi mật khẩu lần đầu
     users.push_back(newUser);
     saveUsersToFile();
-    cout << "Đăng ký tài khoản thành công. Bạn có thể đăng nhập bây giờ.\n";
+     cout << "Đăng ký tài khoản thành công. Bạn có thể đăng nhập bây giờ.\n";
 }
 
 // Đổi mật khẩu cho người dùng đã đăng nhập (idx là vị trí trong vector `users`)
-void changePassword(int idx) {
-     string currentPwd;
-    cout << "Nhap mat khau hien tai: ";
+void changePassword(int idx)
+{
+    string currentPwd;
+    cout << "Nhập mật khẩu hiện tại: ";
     getline(cin, currentPwd);
-    string currentHash = sha256(currentPwd);;
+    string currentHash = sha256(currentPwd);
+    ;
     if (currentHash != users[idx].passwordHash)
     {
-        cout << "Mat khau hien tai khong chinh xac.\n";
+        cout << "Mật khẩu hiện tại không chính xác.\n";
         return;
     }
     string newPwd, confirmPwd;
-    cout << "Mat khau moi: ";
+    cout << "Mật khẩu mới: ";
     getline(cin, newPwd);
-    cout << "Xac nhan mat khau moi: ";
+    cout << "Xác nhận mật khẩu mới: ";
     getline(cin, confirmPwd);
     if (newPwd.empty())
     {
-        cout << "Mat khau moi khong duoc de trong.\n";
+        cout << "Mật khẩu mới không được để trống.\n";
         return;
     }
     if (newPwd != confirmPwd)
     {
-        cout << "Mat khau xac nhan khong khop.\n";
+        cout << "Mật khẩu xác nhận không khớp.\n";
         return;
     }
-    if (sha256(newPwd)  == users[idx].passwordHash)
+    if (sha256(newPwd) == users[idx].passwordHash)
     {
-        cout << "Mat khau moi trung voi mat khau cu. Hay chon mat khau khac.\n";
+         cout << "Mật khẩu mới trùng với mật khẩu cũ. Hãy chọn mật khẩu khác.\n";;
         return;
     }
     // Cập nhật mật khẩu
     users[idx].passwordHash = sha256(newPwd);
     users[idx].needChangePassword = false; // sau khi tự đổi mật khẩu thì không cần đổi nữa
     saveUsersToFile();
-    cout << "Doi mat khau thanh cong.\n";
+    cout << "Đổi mật khẩu thành công.\n";
 }
 
 // Cập nhật thông tin cá nhân (họ tên, email) của người dùng, có xác thực OTP
-void updatePersonalInfo(int idx) {
-    cout << "Ten hien tai: " << users[idx].fullname << ". Nhap ten moi (Enter de giu nguyen): ";
+void updatePersonalInfo(int idx)
+{
+    cout << "Tên hiện tại: " << users[idx].fullname << ". Nhập tên mới (Enter để giữ nguyên): ";
     string newName;
     string input;
     getline(cin, input);
@@ -368,7 +391,7 @@ void updatePersonalInfo(int idx) {
         newName = input;
     else
         newName = users[idx].fullname;
-    cout << "Email hien tai: " << users[idx].email << ". Nhap email moi (Enter de giu nguyen): ";
+    cout << "Email hiện tại: " << users[idx].email << ". Nhập email mới (Enter để giữ nguyên): ";
     string newEmail;
     input.clear();
     getline(cin, input);
@@ -378,7 +401,7 @@ void updatePersonalInfo(int idx) {
         newEmail = users[idx].email;
     if (newName == users[idx].fullname && newEmail == users[idx].email)
     {
-        cout << "Khong co thay doi thong tin.\n";
+        cout << "Không có thay đổi thông tin.\n";
         return;
     }
     // Yêu cầu xác thực OTP trước khi thay đổi thông tin quan trọng
@@ -391,21 +414,24 @@ void updatePersonalInfo(int idx) {
     users[idx].fullname = newName;
     users[idx].email = newEmail;
     saveUsersToFile();
-    cout << "Cap nhat thong tin ca nhan thanh cong.\n";
+    cout << "Cập nhật thông tin cá nhân thành công.\n";
 }
 
 // Thực hiện chuyển điểm từ tài khoản người dùng hiện tại (fromIdx) đến tài khoản đích (toUsername).
 // Có xác thực OTP và đảm bảo tính nguyên tử của giao dịch.
-void transferPoints(int fromIdx) {
+void transferPoints(int fromIdx)
+{
     string toUsername;
     cout << "Nhập tên tài khoản người nhận: ";
     getline(cin, toUsername);
     int toIdx = findUserIndex(toUsername);
-    if (toIdx == -1) {
+    if (toIdx == -1)
+    {
         cout << "Tài khoản người nhận không tồn tại.\n";
         return;
     }
-    if (toIdx == fromIdx) {
+    if (toIdx == fromIdx)
+    {
         cout << "Bạn không thể chuyển điểm cho chính mình.\n";
         return;
     }
@@ -413,47 +439,57 @@ void transferPoints(int fromIdx) {
     cout << "Nhập số điểm cần chuyển: ";
     getline(cin, amountStr);
     long long amount = 0;
-    try {
+    try
+    {
         amount = stoll(amountStr);
-    } catch (...) {
+    }
+    catch (...)
+    {
         amount = 0;
     }
-    if (amount <= 0) {
+    if (amount <= 0)
+    {
         cout << "Số điểm phải là số dương lớn hơn 0.\n";
         return;
     }
-    if (users[fromIdx].balance < amount) {
+    if (users[fromIdx].balance < amount)
+    {
         cout << "Số dư không đủ để thực hiện giao dịch.\n";
         return;
     }
     // Yêu cầu OTP xác nhận giao dịch chuyển điểm
-    if (!verifyOTP(users[fromIdx].email)) {
+    if (!verifyOTP(users[fromIdx].email))
+    {
         return;
     }
     // Thực hiện giao dịch chuyển điểm (đảm bảo nguyên tử)
     long long &senderBal = users[fromIdx].balance;
-    long long &recvBal   = users[toIdx].balance;
+    long long &recvBal = users[toIdx].balance;
     // Lưu lại số dư ban đầu để có thể khôi phục nếu cần (trường hợp giao dịch lỗi)
     long long oldSenderBal = senderBal;
-    long long oldRecvBal   = recvBal;
+    long long oldRecvBal = recvBal;
     // 1. Trừ điểm từ ví người gửi
     senderBal -= amount;
     // 2. Cộng điểm vào ví người nhận
-    recvBal   += amount;
+    recvBal += amount;
     // 3. Lưu thay đổi xuống tệp dữ liệu người dùng (giả định không lỗi)
-    if (!ofstream(USERS_FILE)) {
+    if (!ofstream(USERS_FILE))
+    {
         // Nếu mở tệp không thành công (lỗi ghi file), khôi phục số dư cũ và hủy giao dịch
         senderBal = oldSenderBal;
-        recvBal   = oldRecvBal;
+        recvBal = oldRecvBal;
         cerr << "Lỗi hệ thống: không thể ghi dữ liệu. Giao dịch bị hủy.\n";
         return;
     }
     saveUsersToFile();
     // 4. Ghi lịch sử giao dịch vào tệp log
     ofstream fout(LOG_FILE, ios::app);
-    if (!fout) {
+    if (!fout)
+    {
         cerr << "Không thể ghi lịch sử giao dịch (nhưng giao dịch đã hoàn tất).\n";
-    } else {
+    }
+    else
+    {
         // Lấy thời gian hiện tại (timestamp)
         auto now = chrono::system_clock::now();
         time_t t = chrono::system_clock::to_time_t(now);
@@ -471,20 +507,20 @@ void transferPoints(int fromIdx) {
 void adminCreateUser()
 {
     string username;
-    cout << "Nhap ten dang nhap cho tai khoan moi: ";
+    cout << "Nhập tên đăng nhập cho tài khoản mới: ";
     getline(cin, username);
     if (username.empty())
     {
-        cout << "Ten dang nhap khong duoc de trong.\n";
+        cout << "Tên đăng nhập không được để trống.\n";
         return;
     }
     if (findUserIndex(username) != -1)
     {
-        cout << "Ten dang nhap nay da ton tai. Khong the tao moi.\n";
+        cout << "Tên đăng nhập đang tồn tại. Không thể tạo mới.\n";
         return;
     }
     string roleInput;
-    cout << "Tai khoan nay co quyen quan ly (admin)? (y/n): ";
+    cout << "Tài khoản này có quyền quản lý (admin)? (y/n): ";
     getline(cin, roleInput);
     bool isAdminRole = false;
     if (!roleInput.empty() && (roleInput[0] == 'y' || roleInput[0] == 'Y'))
@@ -492,13 +528,13 @@ void adminCreateUser()
         isAdminRole = true;
     }
     string fullname;
-    cout << "Ten nguoi dung: ";
+    cout << "Tên người dùng: ";
     getline(cin, fullname);
     string email;
     cout << "Email: ";
     getline(cin, email);
     string pwd;
-    cout << "Mat khau (nhan Enter de tu dong tao): ";
+    cout << "Mật khẩu (Nhấn Enter để tạo tự động): ";
     getline(cin, pwd);
     bool autoPass = false;
     if (pwd.empty())
@@ -513,8 +549,8 @@ void adminCreateUser()
             generated.push_back(chars[rand() % chars.size()]);
         }
         pwd = generated;
-        cout << "Mat khau duoc tu dong tao cho tai khoan moi la: " << pwd << endl;
-        cout << "(Yeu cau nguoi dung doi mat khau nay khi dang nhap lan dau tien.)\n";
+        cout << "Mật khẩu được tự động tạo cho tài khoản mới là : " << pwd << endl;
+        cout << "(Yêu cầu người dùng đổi mật khẩu này khi đăng nhập lần đầu tiên)\n";
     }
     string pwdHash = sha256(pwd);
     User newUser;
@@ -527,102 +563,34 @@ void adminCreateUser()
     newUser.needChangePassword = autoPass;
     users.push_back(newUser);
     saveUsersToFile();
-    cout << "Tao tai khoan moi thanh cong.\n";
+    cout << "Tạo tài khoản thành công.\n";
 }
 
-// Thực hiện chuyển điểm từ tài khoản người dùng hiện tại (fromIdx) đến tài khoản đích (toUsername).
-// Có xác thực OTP và đảm bảo tính nguyên tử của giao dịch.
-void transferPoints(int fromIdx) {
-    string toUsername;
-    cout << "Nhập tên tài khoản người nhận: ";
-    getline(cin, toUsername);
-    int toIdx = findUserIndex(toUsername);
-    if (toIdx == -1) {
-        cout << "Tài khoản người nhận không tồn tại.\n";
-        return;
-    }
-    if (toIdx == fromIdx) {
-        cout << "Bạn không thể chuyển điểm cho chính mình.\n";
-        return;
-    }
-    string amountStr;
-    cout << "Nhập số điểm cần chuyển: ";
-    getline(cin, amountStr);
-    long long amount = 0;
-    try {
-        amount = stoll(amountStr);
-    } catch (...) {
-        amount = 0;
-    }
-    if (amount <= 0) {
-        cout << "Số điểm phải là số dương lớn hơn 0.\n";
-        return;
-    }
-    if (users[fromIdx].balance < amount) {
-        cout << "Số dư không đủ để thực hiện giao dịch.\n";
-        return;
-    }
-    // Yêu cầu OTP xác nhận giao dịch chuyển điểm
-    if (!verifyOTP(users[fromIdx].email)) {
-        return;
-    }
-    // Thực hiện giao dịch chuyển điểm (đảm bảo nguyên tử)
-    long long &senderBal = users[fromIdx].balance;
-    long long &recvBal   = users[toIdx].balance;
-    // Lưu lại số dư ban đầu để có thể khôi phục nếu cần (trường hợp giao dịch lỗi)
-    long long oldSenderBal = senderBal;
-    long long oldRecvBal   = recvBal;
-    // 1. Trừ điểm từ ví người gửi
-    senderBal -= amount;
-    // 2. Cộng điểm vào ví người nhận
-    recvBal   += amount;
-    // 3. Lưu thay đổi xuống tệp dữ liệu người dùng (giả định không lỗi)
-    if (!ofstream(USERS_FILE)) {
-        // Nếu mở tệp không thành công (lỗi ghi file), khôi phục số dư cũ và hủy giao dịch
-        senderBal = oldSenderBal;
-        recvBal   = oldRecvBal;
-        cerr << "Lỗi hệ thống: không thể ghi dữ liệu. Giao dịch bị hủy.\n";
-        return;
-    }
-    saveUsersToFile();
-    // 4. Ghi lịch sử giao dịch vào tệp log
-    ofstream fout(LOG_FILE, ios::app);
-    if (!fout) {
-        cerr << "Không thể ghi lịch sử giao dịch (nhưng giao dịch đã hoàn tất).\n";
-    } else {
-        // Lấy thời gian hiện tại (timestamp)
-        auto now = chrono::system_clock::now();
-        time_t t = chrono::system_clock::to_time_t(now);
-        tm localtm = *localtime(&t);
-        // Ghi vào log: thời gian, người gửi, người nhận, số điểm
-        fout << put_time(&localtm, "%Y-%m-%d %H:%M:%S") << ", "
-             << users[fromIdx].username << ", "
-             << users[toIdx].username << ", "
-             << amount << "\n";
-        fout.close();
-    }
-    cout << "Chuyển điểm thành công. Số dư hiện tại của bạn là " << users[fromIdx].balance << " điểm.\n";
-}
 
 // Xem toàn bộ lịch sử giao dịch (dành cho quản trị viên)
-void viewTransactionLog() {
+void viewTransactionLog()
+{
     ifstream fin(LOG_FILE);
-    if (!fin) {
+    if (!fin)
+    {
         cout << "Không có lịch sử giao dịch nào.\n";
         return;
     }
     cout << "===== LỊCH SỬ GIAO DỊCH HỆ THỐNG =====\n";
     string line;
-    while (getline(fin, line)) {
+    while (getline(fin, line))
+    {
         cout << line << endl;
     }
     fin.close();
 }
 
 // Xem lịch sử giao dịch của chính người dùng hiện tại (chỉ liệt kê các giao dịch mà user này gửi hoặc nhận)
-void viewMyTransactions(int idx) {
+void viewMyTransactions(int idx)
+{
     ifstream fin(LOG_FILE);
-    if (!fin) {
+    if (!fin)
+    {
         cout << "Không có lịch sử giao dịch.\n";
         return;
     }
@@ -630,7 +598,8 @@ void viewMyTransactions(int idx) {
     string line;
     string uname = users[idx].username;
     // Duyệt từng dòng trong log, kiểm tra sự xuất hiện của username (ở cột người gửi hoặc người nhận)
-    while (getline(fin, line)) {
+    while (getline(fin, line))
+    {
         // Mỗi dòng format: TIMESTAMP, FROM_USER, TO_USER, AMOUNT
         // Sử dụng stringstream để tách các phần
         string ts, fromUser, toUser;
@@ -642,21 +611,28 @@ void viewMyTransactions(int idx) {
         string amountStr;
         getline(ss, amountStr, ',');
         // Loại bỏ khoảng trắng thừa xung quanh các phần tử đã tách
-        auto trim = [](string &s) {
-            while (!s.empty() && isspace(s.back())) s.pop_back();
-            while (!s.empty() && isspace(s.front())) s.erase(0, 1);
+        auto trim = [](string &s)
+        {
+            while (!s.empty() && isspace(s.back()))
+                s.pop_back();
+            while (!s.empty() && isspace(s.front()))
+                s.erase(0, 1);
         };
         trim(ts);
         trim(fromUser);
         trim(toUser);
         trim(amountStr);
-        try {
+        try
+        {
             amount = stoll(amountStr);
-        } catch (...) {
+        }
+        catch (...)
+        {
             amount = 0;
         }
         // Kiểm tra nếu user hiện tại là người gửi hoặc người nhận
-        if (fromUser == uname || toUser == uname) {
+        if (fromUser == uname || toUser == uname)
+        {
             // Xác định vai trò của user trong giao dịch (gửi hoặc nhận)
             string action = (fromUser == uname) ? "đã gửi" : "đã nhận";
             string otherUser = (fromUser == uname) ? toUser : fromUser;
@@ -668,7 +644,8 @@ void viewMyTransactions(int idx) {
 }
 
 // Xem thông tin tài khoản cá nhân của người dùng (username, họ tên, email, số dư, vai trò)
-void viewPersonalInfo(int idx) {
+void viewPersonalInfo(int idx)
+{
     cout << "===== THÔNG TIN TÀI KHOẢN =====\n";
     cout << "Tên đăng nhập:  " << users[idx].username << endl;
     cout << "Họ và tên:      " << users[idx].fullname << endl;
@@ -682,10 +659,10 @@ void listAllUsers()
 {
     cout << "===== DANH SACH NGUOI DUNG =====\n";
     cout << setw(15) << left << "Username"
-         << setw(25) << left << "Ho ten"
+         << setw(25) << left << "Họ Tên"
          << setw(30) << left << "Email"
-         << setw(10) << left << "So du"
-         << setw(10) << left << "Quyen" << endl;
+         << setw(10) << left << "Số dư"
+         << setw(10) << left << "Quyền" << endl;
     for (const auto &u : users)
     {
         cout << setw(15) << left << u.username
@@ -698,9 +675,13 @@ void listAllUsers()
 }
 
 // -------------------- HÀM MAIN (CHƯƠNG TRÌNH CHÍNH) --------------------
-int main() {
+int main()
+{
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
     // Tải dữ liệu người dùng từ tệp vào vector `users`
     int userCount = loadUsersFromFile();
+    cout << "Đã tải " << userCount << " người dùng.\n";
     if (userCount == 0) {
         // Nếu hệ thống chưa có người dùng nào, tự động tạo tài khoản quản trị mặc định
         User admin;
@@ -848,3 +829,5 @@ int main() {
 
     return 0;
 }
+// Kết thúc chương trình
+// -------------------- KẾT THÚC --------------------
