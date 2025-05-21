@@ -12,21 +12,21 @@ WalletSystem là một ứng dụng dòng lệnh để quản lý tài khoản n
 - **Phân Quyền**: Quản trị viên có thể tạo tài khoản, xem danh sách người dùng và lịch sử giao dịch.
 
 ## Đóng Góp Nhóm
-1. **Phan Anh**:
+1. **Phan Phương Anh - K24DTCN168 - phananh1304@gmail.com**:
    - Chuẩn bị dự án, viết hàm `main`.
    - Xử lý đăng nhập (`loginUser`), tạo tài khoản quản trị mặc định.
    - Gửi OTP qua email với thư viện cURL (`sendEmailOTP`, `verifyOTP`).
    - Cài đặt thư viện liên quan.
-2. **Tiến Dũng**:
+2. **Trần Tiến Dũng -K24DTCN182 - trantiendung740@gmail.com**:
    - Đăng ký người dùng (`registerUser`).
    - Quản trị viên tạo tài khoản mới (`adminCreateUser`).
    - Tải dữ liệu từ tệp `users.txt` (`loadUsersFromFile`), tìm người dùng (`findUserIndex`).
    - Liệt kê danh sách người dùng (`listAllUsers`).
-3. **Nguyễn Tùng**:
+3. **Nguyễn Văn Tùng -K24DTCN246-caubuonviem1280@gmail.com**:
    - Xem thông tin tài khoản cá nhân (`viewPersonalInfo`).
    - Đổi mật khẩu (`changePassword`).
    - Cập nhật thông tin cá nhân (`updatePersonalInfo`).
-4. **Dương Lê**:
+4. **Lê Hoàng Dương-K24DTCN184 - duonglh725@gmail.com**
    - Chuyển điểm (`transferPoints`).
    - Xem toàn bộ lịch sử giao dịch (`viewTransactionLog`).
    - Xem lịch sử giao dịch cá nhân (`viewMyTransactions`).
