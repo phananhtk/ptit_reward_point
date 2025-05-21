@@ -229,12 +229,17 @@ Hướng dẫn này cung cấp các bước chi tiết để cài đặt môi tr
 
 ## Mô tả Cách Chạy Chương Trình
 - **Chạy chương trình với Makefile bằng MSYS2 MINGW64**
-1. Chuyển đến thư mục:
+1. Cài đặt trình biên dịch và make:
+```
+pacman -S mingw-w64-x86_64-toolchain mingw-w64-x86_64-make
+```
+2. Chuyển đến thư mục:
 ```
 cd "/d/ptit/C++ PTIT/ptit_reward_point" 
 ```
 - đường dẫn dến dự án của bạn
-Biến dịch:
+
+3. Biến dịch:
 ```
 make
 ```
@@ -347,6 +352,11 @@ Lựa chọn:
   - **Lỗi Chạy**: Đảm bảo định dạng `users.txt` đúng và tệp nằm trong thư mục chứa `wallet_system`.
 
 ## Ghi Chú
+- Sử dụng Vscode thêm đoạn mã đầu hàm `main` để sử dụng tiếng việt trong terminal .
+   ```
+      SetConsoleOutputCP(CP_UTF8);
+      SetConsoleCP(CP_UTF8);
+   ```
 - Tài khoản quản trị mặc định: `username: admin`, `password: admin` (yêu cầu đổi mật khẩu khi đăng nhập lần đầu).
 - Cập nhật Homebrew (macOS): `brew update`.
 - Cập nhật MSYS2 (Windows): `pacman -Syu`.
